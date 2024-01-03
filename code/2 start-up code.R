@@ -8,16 +8,30 @@
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror
 
 #load libraries
-packages=c("ggplot2", "dplyr", "lubridate", "tidyverse", "broom", "FSA", "glmmTMB", "lme4", "tidyr", "DescTools", "scales", "ggpubr", "grid", "lattice", "sjPlot", "sjlabelled", "sjmisc", "cowplot", "broom.mixed", "ggforce", "gridGraphics", "ggeffects")
+pacman::p_load(ggplot2, 
+               dplyr, 
+               lubridate, 
+               tidyverse,   
+               broom,  
+               FSA,      
+               glmmTMB,  
+               lme4,   
+               tidyr,      
+               DescTools,
+               scales,
+               ggpubr,
+               grid,
+               lattice,
+               sjPlot,
+               sjlabelled,
+               sjmisc,
+               cowplot, 
+               broom.mixed,
+               ggforce, 
+               gridGraphics,
+               ggeffects
+)
 
-# Install packages not yet installed
-installed_packages <- packages %in% rownames(installed.packages())
-if (any(installed_packages == FALSE)) {
-  install.packages(packages[!installed_packages])
-}
-
-# Packages loading
-lapply(packages, library, character.only = TRUE)
 
 select<-dplyr::select
 filter<-dplyr::filter
@@ -39,7 +53,7 @@ assays%>%filter(is.na(trialnumber))
 assays %>% filter(squirrel_id== 13305)
 
 assays<-read.csv("Trials.csv", header=T) %>%
-	bind_rows(read.csv("~/Documents/Files/PhD/Boris/Personality KRSP Master File (Dec 12, 2023).csv", header=T)%>%select(-X) %>%mutate_at(vars(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency), as.numeric)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below
+	bind_rows(read.csv("Personality KRSP Master File (Dec 12, 2023).csv", header=T)%>%select(-X) %>%mutate_at(vars(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency), as.numeric)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below
 	group_by(sq_id, trialdate) %>%
 	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)
 	filter(row_number()==1) %>%
