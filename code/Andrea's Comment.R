@@ -1,5 +1,5 @@
 #Andrea's Comment
-#Last edited Jan 2, 2023 by J. I. Sanders
+#Last edited Jan 14, 2023 by J. I. Sanders
 
 # Load packages
 library(purrr)
@@ -57,5 +57,36 @@ keep_30
 #STEP TWO:
 #how to have it sample a set amount of time (e.g., 7 minutes of the whole day) - here it could be 1 minute of the "whole (2 minute)" day = continous/consecutive time 
 
+keep_all <- function(x) {
+  n <- nrow(x)
+  if (n < 60) return(NULL)
+
+  start_indices <- sample(1:(n-59), 1)
+  selected_indices <- start_indices:(start_indices + 59)
+  return(x[selected_indices, , drop = FALSE])
+}
+
+# Apply the function to each squirrel
+result <- dt[, keep_all(.SD), by = squirrel_id]
+
+# Print the result
+result
+
 #STEP THREE:
 #have it sample a random set amount of time (e.g., 7 minutes randomly spread out across the whole day) - here it could be 1 minute of the "whole (2 minute)" day = noncontinous/nonconsecutive time
+
+# Define a function to randomly generate one-minute samples with non-consecutive seconds
+random_set <- function(x) {
+  n <- nrow(x)
+  if (n < 60) return(NULL)
+
+  selected_indices <- sample(1:n, 60, replace = FALSE)
+  return(x[selected_indices, , drop = FALSE])
+}
+
+# Apply the function to each squirrel
+result <- dt[, random_set(.SD), by = squirrel_id] 
+ordered_result <- result[order(result)]
+
+# Print the result
+ordered_result
