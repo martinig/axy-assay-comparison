@@ -33,7 +33,7 @@ head(merged)
 
 
 final_MCMC<-merged%>% 
-  	mutate(date=yday(trialdate), #converts dates to julian date!
+  	mutate(date=yday(trialdate), #converts dates to days since Jan 1st!
          age2=age^2,
          local.density=assay.local.density,
          avg_fam =assay_avg_fam) %>% #make a quadratic age variable
@@ -55,7 +55,9 @@ final_MCMC<-merged%>%
   		date = if(n() == 1 && !is.na(date) | sum(!is.na(date)) == 1) 0 * date
   			else ((date-mean(date, na.rm=T))/(1*(sd(date, na.rm=T)))), 
   			date = replace(date, is.nan(date), 0)) %>%
-    	ungroup
+    	ungroup() %>%
+    	filter(!squirrel_id==100071) %>% #remove this proble squirrel because we are missing so much data for it!
+    	filter(!is.na(avg_fam)) #we have a lot of NAs for this - remove for now and APRIL needs to investigate (Jan 16, 2024)
 
 final_MCMC %>% filter(is.na(age))              
 #make sure to always check for new NAs after standardization because it doesnt work when a squirrel is the only individual in their grid and year; give mean values (0) to these records
@@ -69,6 +71,7 @@ write.csv(final_MCMC, "/Users/april-martinig/Desktop/final_dataset.csv")
 #make sure variables aren't standardized before running this
 attach(final_MCMC);tt=cbind(year, age, age2, local.density, avg_fam, date)
 cor(tt)  
+ 
 #axy_yr & assay_yr = 0.77
   #going with assay_yr instead of axy_yr because:
   #theres overlap btw the two but assay_yr spans larger range & 
