@@ -40,6 +40,8 @@ result <- dt[, generate_sample(.SD), by = squirrel_id]
 # Print the result
 result
 
+result %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
+
 #now that the FAKE data is in a format that is similar to what the axy data will actually be in, we can begin to try to sample the data accordingly
 
 #STEP ONE:
@@ -51,6 +53,9 @@ keep_30<-result%>%
   	arrange(squirrel_id, timestamp)
 
 keep_30
+
+keep_30 %>% filter(squirrel_id== 12678)
+
 
 #next steps
 
@@ -67,10 +72,13 @@ keep_all <- function(x) {
 }
 
 # Apply the function to each squirrel
-result <- dt[, keep_all(.SD), by = squirrel_id]
+result2 <- dt[, keep_all(.SD), by = squirrel_id]
 
 # Print the result
-result
+result2
+
+result2 %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
+
 
 #STEP THREE:
 #have it sample a random set amount of time (e.g., 7 minutes randomly spread out across the whole day) - here it could be 1 minute of the "whole (2 minute)" day = noncontinous/nonconsecutive time
@@ -90,3 +98,5 @@ ordered_result <- result[order(result)]
 
 # Print the result
 ordered_result
+
+ordered_result %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
