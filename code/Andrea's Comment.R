@@ -1,5 +1,5 @@
 #Andrea's Comment
-#Last edited Jan 14, 2023 by J. I. Sanders
+#Last edited Feb 11, 2024 by J. I. Sanders
 
 # Load packages
 library(purrr)
@@ -59,44 +59,54 @@ keep_30 %>% filter(squirrel_id== 12678)
 
 #next steps
 
-#STEP TWO:
+#STEP TWO A:
 #how to have it sample a set amount of time (e.g., 7 minutes of the whole day) - here it could be 1 minute of the "whole (2 minute)" day = continous/consecutive time 
 
-keep_all <- function(x) {
+# Function to randomly select one minute of data
+consecutive_minute <- function(x) {
   n <- nrow(x)
-  if (n < 60) return(NULL)
-
-  start_indices <- sample(1:(n-59), 1)
-  selected_indices <- start_indices:(start_indices + 59)
+  if (n < 2) return(NULL)
+  
+  start_index <- sample(1:(n-1), 1)
+  selected_indices <- start_index:(start_index + 1)
   return(x[selected_indices, , drop = FALSE])
 }
 
 # Apply the function to each squirrel
-result2 <- dt[, keep_all(.SD), by = squirrel_id]
+consecutive_minute <- keep_30 %>%
+  group_split(squirrel_id) %>%
+  map(~ consecutive_minute(.x))
+
+# Convert the list of data.frames to a single data.frame
+result2 <- bind_rows(consecutive_minute)
 
 # Print the result
 result2
 
 result2 %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
 
-
 #STEP THREE:
 #have it sample a random set amount of time (e.g., 7 minutes randomly spread out across the whole day) - here it could be 1 minute of the "whole (2 minute)" day = noncontinous/nonconsecutive time
 
-# Define a function to randomly generate one-minute samples with non-consecutive seconds
-random_set <- function(x) {
+# Function to randomly select one minute of data from a two-minute sample
+random_one_minute <- function(x) {
   n <- nrow(x)
-  if (n < 60) return(NULL)
-
-  selected_indices <- sample(1:n, 60, replace = FALSE)
+  if (n < 2) return(NULL)  # Need at least 2 records (1 minute) for sampling
+  
+  selected_indices <- sample (1:n, 2) # Select 2 random samples (one minute total)
   return(x[selected_indices, , drop = FALSE])
 }
 
 # Apply the function to each squirrel
-result <- dt[, random_set(.SD), by = squirrel_id] 
-ordered_result <- result[order(result)]
+random_one_minute_result <- keep_30 %>%
+  group_split(squirrel_id) %>%
+  map(~ random_one_minute(.x))
+
+# Convert the list of data.frames to a single data.frame
+result3 <- bind_rows(random_one_minute_result)
 
 # Print the result
-ordered_result
+result3
 
-ordered_result %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
+# Put random samples in numerical order
+result3 %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
