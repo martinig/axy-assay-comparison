@@ -1,5 +1,5 @@
 #PCA calculcations for axy behaviours 
-#last updated Oct 20, 2023 by A. R. Martinig
+#last updated Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -13,7 +13,7 @@ axy data subsets.R
 
 colnames(axy1)
 
-PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoveing", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)
+PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)
 summary(PCaxys1) 
 PCaxys1
 ##PC1: feeding, foraging, -nestnotmoving, travel
@@ -21,8 +21,8 @@ PCaxys1
 ##PC3: nestmoveing, notmoving
 
 #add PCs to dataset
-axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]
-axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]
+axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]
+axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]
 
 
 

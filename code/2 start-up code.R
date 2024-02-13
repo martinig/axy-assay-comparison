@@ -49,11 +49,8 @@ filter<-dplyr::filter
 
 #creating the assay datast we will be using here
 
-assays%>%filter(is.na(trialnumber))
-assays %>% filter(squirrel_id== 13305)
-
 assays<-read.csv("Trials.csv", header=T) %>%
-	bind_rows(read.csv("Personality KRSP Master File (Dec 12, 2023).csv", header=T)%>%select(-X) %>%mutate_at(vars(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency), as.numeric)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below
+	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still", "front", "back", "attack", "attacklatency", "approachlatency"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below
 	group_by(sq_id, trialdate) %>%
 	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)
 	filter(row_number()==1) %>%
@@ -65,7 +62,6 @@ assays<-read.csv("Trials.csv", header=T) %>%
 	ungroup() %>%
 #converting the raw scores
 	mutate(
-
 	ageclass=ifelse(age==0, "J", 
 			ifelse(age==1, "Y", 
 			ifelse(age>1, "A",  ageclass))),
@@ -77,7 +73,7 @@ assays<-read.csv("Trials.csv", header=T) %>%
 		hang=(hang/450), 
 		chew=(chew/450), 
 		groom=(groom/450), 
-		still=(still/450), 
+		still=(still/450),
 		front=(front/300), 
 		back=(back/300), 
 		attack=(attack/300), 
@@ -86,11 +82,11 @@ assays<-read.csv("Trials.csv", header=T) %>%
 	
 	filter(!squirrel_id== 23686, #IT DOES NOT HAVE A SEX LISTED ANYWHERE!
 	
-	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) |front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% 
+	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) | front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% 
 	#attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds 
 	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks
 	#this leaves squirrels with <=252 attacks (which also should be investigated)
-	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt)) %>%
+	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt, front, back, attack, attacklatency, approachlatency)) %>%
 	droplevels()
 	
 summary(assays)
@@ -101,6 +97,10 @@ nrow(assays) #1184
 
 table(assays$sex, assays$ageclass)
 table(assays$observer)
+
+
+assays%>%filter(is.na(trialnumber))
+assays %>% filter(squirrel_id== 13305)
 
 
 ########################################
@@ -149,7 +149,9 @@ table(ju$sum, ju$sex)
 birth<-read.csv ("fitness.csv") %>%
 	select(c(squirrel_id, sex, byear, dyear, litter_id)) %>%
 	mutate(sex=ifelse(squirrel_id %in% c(21128, 21348), "F",
-		ifelse(squirrel_id %in% c(19890, 23326, 23210), "M", as.character(sex)))) 
+		ifelse(squirrel_id %in% c(19890, 23326, 23210), "M", as.character(sex)))) %>%
+	group_by(squirrel_id) %>%
+	filter(row_number()==1)
 
 summary(birth)
 head(birth)
@@ -160,18 +162,18 @@ head(birth)
 
 #for now I am just using Emily's data as I am waiting for Matt to provide me complete records
   
-axy<-read.csv("SquirrelAxyData_Emily.csv", header=T) %>%
+axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%
 	mutate(
-	axy_id=paste(Squirrel_ID, date, tod, sep = "-"), 
+	axy_id=paste(id, date, tod, sep = "-"), 
 	axy_date=ymd(date),
 	axy_yr=year(date),
 	axy_month=month(date)) %>%
-	select(squirrel_id= Squirrel_ID, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving, travel=Travel, total, out, act, grid=Grid, treatment=Treatment, axy_id)
+	select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)
 
 head(axy)
 
-(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #251 individuals
-nrow(axy) #25446
+(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals
+nrow(axy) #37668
 
 
 

@@ -1,6 +1,6 @@
 #code to calculate familiarity scores (assays dataset)
 #original code by E. R. Siracusa
-#last updated on Oct 20, 2023 by A. R. Martinig
+#last updated on Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -73,8 +73,8 @@ assay_fam %<>%
 assay_fam<-rbind(assay_fam, missings)	
 		
 summary(assay_fam)
-(assay_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #810 inds
-nrow(assay_fam) #930
+(assay_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #822 inds
+nrow(assay_fam) #944
 
 ###########################
 #familiarity for assays ------

@@ -1,6 +1,6 @@
 #code to calculate local density
 #original code by E. R. Siracusa
-#last updated on Oct 11, 2023 by A. R. Martinig
+#last updated on Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -14,11 +14,16 @@ distance <- 130 #establish your radius for collecting neighbourhood data
 neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in
 
 #Connect to database - replace with your username below
+
+#APRIL's connection to database
 con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com",
                   dbname ="krsp",
              user="amartinig",
            password = keyring::key_get("krsp")
 )  
+
+#JONAS's connection to database
+con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com", dbname ="krsp", user="jsanders", password = keyring::key_get("krsp") )
 
 
 #Bring in the census - depending on what data you're working with you may need the dbamidden file or the census file or both
@@ -262,7 +267,7 @@ min_info_axy<-axy1 %>%
 		group_by(squirrel_id, axy_yr) %>% #only need to keep 1 record per squirrel per assay year and axy year
 		filter(row_number()==1) %>%
 		ungroup()%>%
-		select(squirrel_id, axy_yr, axy_date, grid, axy_month) 
+		select(squirrel_id, axy_yr, axy_date, axy_month) 
 		
 (min_info_axy) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds
 
@@ -287,7 +292,6 @@ nrow(min_info_axy) #327
 axy_local_density <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squirrel_id", "axy_yr"="year", "axy_month"="month")) %>% 
 	mutate(axy.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density
 		date = as.character(date),
-		grid=grid.x,
 		axy_month=month(axy_date),
 		census_month=month(date),
 		locX=
@@ -298,7 +302,7 @@ axy_local_density <- left_join(min_info_axy, census_forcombining, by=c("squirrel
 			ifelse(squirrel_id==11537, 2.5, locY))) %>%
 	mutate(date=ifelse(squirrel_id==11537, "2014-05-15", date)) %>%
 	mutate(date = ymd(date)) %>%
-	select(-c(grid.x, grid.y, sex)) %>%
+	select(-c(sex)) %>%
 #squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	
 	filter(!(squirrel_id == 19257 & reflo == "E7"),
 		!(squirrel_id == 10355 & reflo == "Q6"), 
@@ -316,8 +320,8 @@ axy_local_density<-axy_local_density %>% mutate(axy_month =
 
 	
 summary(axy_local_density)
-(axy_local_density) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds
-nrow(axy_local_density) #327
+(axy_local_density) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #335 inds
+nrow(axy_local_density) #428
 
 
 ##################################################

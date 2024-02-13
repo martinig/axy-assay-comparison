@@ -1,6 +1,6 @@
 #code to calculate familiarity scores (axys dataset)
 #original code by E. R. Siracusa
-#last updated on Oct 20, 2023 by A. R. Martinig
+#last updated on Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -17,7 +17,6 @@ axy_fam <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squi
 	select(-axy_month) %>% #axy_month had been set to either May or August for ease of matching it up with the census data
 	mutate(axy.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density
 		date = as.character(date),
-		grid=grid.x,
 		axy_month = month(axy_date), #use the actual month that the axy was conducted to calculate familiarity accurately
         	census_month=month(date),
         locX=ifelse(squirrel_id==13412, -7.7, locX),
@@ -31,15 +30,15 @@ axy_fam <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squi
 		ifelse(axy_month>=7 & census_month==8, 8,
 		ifelse(axy_month>=7 & census_month==9, 9,
 		 	axy_month))))))) %>%
-	select(-c(grid.x, grid.y, sex)) %>%
+	select(-c(sex)) %>%
 #squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	
 	filter(!(squirrel_id == 19257 & reflo == "E7"),
 		!(squirrel_id == 10355 & reflo == "Q6"), 
 		!(squirrel_id == 12435 & reflo == "K12")) 
 
 summary(axy_fam)
-(axy_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds
-nrow(axy_fam) #327
+(axy_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #335 inds
+nrow(axy_fam) #428
 
 
 ###########################
