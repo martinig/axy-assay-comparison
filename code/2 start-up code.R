@@ -1,7 +1,7 @@
 #this is the first R script that always needs to be run
 #all the data cleaning is here 
 #if a mistake is found message April before making changes
-#Last edited on Jan 4, 2024 by A. R. Martinig 
+#Last edited on Feb 13, 2024 by A. R. Martinig 
 
 #axy-assay analysis for Jonas
 
@@ -189,53 +189,3 @@ squirrel_theme <- theme_bw() +
       axis.text.y = element_text(size = 11, colour = "black"), 
       legend.title = element_text(size = 11, colour = "black"), 
       legend.text = element_text(size = 10, colour = "black"))
-      
-      
-#delete later
-
-matt<-read.csv("AxyDatabase Matt.csv", header=T) %>% select(squirrel_id)
-(matt) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #396 individuals
-
-assays_in_axy<-inner_join(assays, matt, by=c("squirrel_id"="squirrel_id")) %>% group_by(squirrel_id, trialdate) %>% filter(row_number()==1)
-(assays_in_axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #62 individuals
-nrow(assays_in_axy) #71 assays
-
-#checking the data
-assays_in_axy %>% filter(squirrel_id==13288) #2
-matt %>% filter(squirrel_id==13288) #1 record
-assays %>% filter(squirrel_id==13288) #2 records
-
-assays_in_axy %>% filter(squirrel_id== 11256) #12
-matt %>% filter(squirrel_id== 11256) #4 records
-assays %>% filter(squirrel_id== 11256) #3 records
-
-assays_in_axy %>% filter(squirrel_id== 13305) #4 records
-matt %>% filter(squirrel_id== 13305) #4 records
-assays %>% filter(squirrel_id== 13305) #1 record
-
-write.csv(assays_in_axy, "/Users/april-martinig/Desktop/assay subset in axy data.csv")	
-
-#the axy data subset that is in the assay dataset
-
-matt<-read.csv("AxyDatabase Matt.csv", header=T) 
-
-axy_in_assay<-inner_join(matt, assays, by=c("squirrel_id"="squirrel_id")) %>% group_by(squirrel_id, power_on_date) %>% filter(row_number()==1)
-(axy_in_assay) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #73 individuals
-nrow(axy_in_assay) #154 axys
-
-#checking the data
-axy_in_assay %>% filter(squirrel_id==13288) #1
-matt %>% filter(squirrel_id==13288) #1 record
-assays %>% filter(squirrel_id==13288) #3 records
-
-axy_in_assay %>% filter(squirrel_id== 11256) #4
-matt %>% filter(squirrel_id== 11256) #4 records
-assays %>% filter(squirrel_id== 11256) #4 records
-
-axy_in_assay %>% filter(squirrel_id== 13305) #4 records
-matt %>% filter(squirrel_id== 13305) #4 records
-assays %>% filter(squirrel_id== 13305) #4 record
-
-#write.csv(axy_in_assay, "/Users/april-martinig/Desktop/axy subset in assay data.csv")	
-
-      
