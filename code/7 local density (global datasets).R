@@ -7,24 +7,8 @@ start-up code.R
 axy data subsets.R
 PCA Generation Code - Assays.R
 
-library(magrittr)
-library(krsp)
-
 distance <- 130 #establish your radius for collecting neighbourhood data
 neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in
-
-#Connect to database - replace with your username below
-
-#APRIL's connection to database
-con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com",
-                  dbname ="krsp",
-             user="amartinig",
-           password = keyring::key_get("krsp")
-)  
-
-#JONAS's connection to database
-con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com", dbname ="krsp", user="jsanders", password = keyring::key_get("krsp") )
-
 
 #Bring in the census - depending on what data you're working with you may need the dbamidden file or the census file or both
 

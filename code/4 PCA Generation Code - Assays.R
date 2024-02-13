@@ -41,7 +41,7 @@ personality_all<-assays%>%
 	group_by(squirrel_id, trialnumber)%>%
 	filter(row_number()==1) %>%
 	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% 
-	select(-videodate,-trialtime)
+	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)
 
 summary(personality_all)
 head(personality_all)
@@ -63,7 +63,7 @@ personality_67<-assays%>%
 	group_by(squirrel_id, trialnumber)%>%
 	filter(row_number()==1) %>%
 	ungroup() %>%
-	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate, walk, jump, hole, hang, chew, groom, still)
+	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)
 	
 summary(personality_67)	
 head(personality_67)	
@@ -81,7 +81,7 @@ personality_52<-assays%>%
 	group_by(squirrel_id, trialnumber)%>%
 	filter(row_number()==1) %>%
 	ungroup() %>%
-	select(squirrel_id, OFT1, OFT2, observer, ageclass, sex, cohort, year, age, grid, trialnumber, trialdate, walk, jump, hole, hang, chew, groom, still)
+	select(squirrel_id, OFT1, OFT2, observer, ageclass, sex, cohort, year, age, grid, trialnumber, trialdate)
 	
 summary(personality_52)	
 head(personality_52)	

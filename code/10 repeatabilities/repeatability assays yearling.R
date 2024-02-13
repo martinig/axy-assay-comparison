@@ -1,5 +1,5 @@
-#repeatability estimates for juvenile squirrels for the assay complete dataset
-#last edited Nov 10, 2023 by A. R. Martinig
+#repeatability estimates for yearling squirrels for the assay complete dataset
+#last edited Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -7,25 +7,25 @@ PCA Generation Code - Assays.R
 local density (global datasets).R
 familiarity assays (global datasets).R
 
-juv_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
-	filter(ageclass=="J") %>% 
-	select(-c(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency)) %>%
+yearling_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
+	filter(ageclass=="Y") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),
 		year=year-2005)%>%
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects 
-	mutate(b.assay.local.density= mean(assay.local.density)) %>%
+	mutate(b.assay.local.density= mean(assay.local.density),		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%
 	ungroup()
 
-summary(juv_assay_all)
+summary(yearling_assay_all)
 
-(juv_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id)%>%nrow() #321 individuals
-summary(juv_assay_all$trialnumber)
-nrow(juv_assay_all) #441
+(yearling_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #209 individuals
+summary(yearling_assay_all$trialnumber)
+nrow(yearling_assay_all) #258
 
-#################################################
-#############     Juveniles        ##############
-#############      n = 321         ##############
-#################################################
+
+#########################################
+#############     Yearlings         #############
+#############      n = 209         ##############
+#########################################
 
 #############################
 ######## OFT1 models ########
@@ -35,18 +35,19 @@ nrow(juv_assay_all) #441
 #non-adjusted repeatability
 #############################
 
-m5a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data= juv_assay_all)
-summary(m5a)
+m3a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+summary(m3a)
 
-plot(m5a)
-hist(resid(m5a)) 
+plot(m3a) 
+hist(resid(m3a))
 
-sm1<-arm::sim(m5a,1000)
+#for OFT PC1 (i.e. OFT1)
+sm1<-arm::sim(m3a,1000)
 smfixef=sm1@fixef
 smranef=sm1@ranef
 smfixef=coda::as.mcmc(smfixef)
 MCMCglmm::posterior.mode(smfixef)
-coda::HPDinterval(smfixef) #potential issue w/trialnumber, grid SU, sexM
+coda::HPDinterval(smfixef) #potential issue w/grid RR, SU, SUX
 
 ##among-individual variance
 bID<-sm1@ranef$squirrel_id
@@ -71,18 +72,19 @@ coda::HPDinterval(rID)
 #adjusted repeatability
 #############################
 
-m5b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + (1|squirrel_id) + (1| year), data= juv_assay_all)
-summary(m5b)
+m3b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+summary(m3b)
 
-plot(m5b)
-hist(resid(m5b)) 
+plot(m3b)
+hist(resid(m3b))
 
-sm1<-arm::sim(m5b,1000)
+#for OFT PC1 (i.e. OFT1)
+sm1<-arm::sim(m3b,1000)
 smfixef=sm1@fixef
 smranef=sm1@ranef
 smfixef=coda::as.mcmc(smfixef)
 MCMCglmm::posterior.mode(smfixef)
-coda::HPDinterval(smfixef) #potential issue w/trialnumber, grid SU, sexM
+coda::HPDinterval(smfixef) #potential issue w/grid RR, SU, SUX
 
 ##among-individual variance
 bID<-sm1@ranef$squirrel_id
@@ -111,19 +113,19 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m6a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= juv_assay_all)
-summary(m6a)
+m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+summary(m4a)
 
-plot(m6a)
-hist(resid(m6a)) 
+plot(m4a) 
+hist(resid(m4a))
 
 #for OFT PC2 (i.e. OFT2)
-sm2<-arm::sim(m6a,1000)
+sm2<-arm::sim(m4a,1000)
 smfixef2=sm2@fixef
 smranef2=sm2@ranef
 smfixef2=coda::as.mcmc(smfixef2)
 MCMCglmm::posterior.mode(smfixef2)
-coda::HPDinterval(smfixef2) 
+coda::HPDinterval(smfixef2) #potential issues w/ grid RR
 
 ##among-individual variance
 bID2<-sm2@ranef$squirrel_id
@@ -148,20 +150,19 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m6b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + (1|squirrel_id) + (1| year), data= juv_assay_all)
-summary(m6b)
+m4b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+summary(m4b)
 
-plot(m6b)
-hist(resid(m6b)) 
-
+plot(m4b) 
+hist(resid(m4b))
 
 #for OFT PC2 (i.e. OFT2)
-sm2<-arm::sim(m6b,1000)
+sm2<-arm::sim(m4b,1000)
 smfixef2=sm2@fixef
 smranef2=sm2@ranef
 smfixef2=coda::as.mcmc(smfixef2)
 MCMCglmm::posterior.mode(smfixef2)
-coda::HPDinterval(smfixef2) 
+coda::HPDinterval(smfixef2) #potential issues w/ grid RR
 
 ##among-individual variance
 bID2<-sm2@ranef$squirrel_id

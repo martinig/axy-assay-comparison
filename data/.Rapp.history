@@ -1,8 +1,18 @@
+#working directory here#
+#Last edited on Jan 4, 2024 by A. R. Martinig #
+#
 #Delete previous information stored #
 rm(list=ls(all=T))#
 #
 ##set wd to the folder with all your csv's in it#
 setwd("~/Documents/Files/Post-docs/UofC/Jonas (ECOL 530)/axy-assay-comparison/data")
+#this is the first R script that always needs to be run#
+#all the data cleaning is here #
+#if a mistake is found message April before making changes#
+#Last edited on Feb 13, 2024 by A. R. Martinig #
+#
+#axy-assay analysis for Jonas#
+#
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
 #
 #load libraries#
@@ -27,7 +37,9 @@ pacman::p_load(ggplot2, #
                broom.mixed,#
                ggforce, #
                gridGraphics,#
-               ggeffects#
+               ggeffects,#
+               magrittr,#
+               krsp#
 )#
 select<-dplyr::select#
 filter<-dplyr::filter#
@@ -39,129 +51,8 @@ filter<-dplyr::filter#
 #impossible values removed#
 #########################################
 #
-#creating the assay datast we will be using here
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%
-select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%
-mutate_at(vars(walk, jump, hole, hang, chew, groom, still), ~ as.numeric(as.character(.)), na.rm=TRUE)
-assays<-read.csv("Trials.csv", header=T) %>%
-bind_rows(read.csv("Personality KRSP Master File (Dec 12, 2023).csv", header=T)%>%select(-c(X, still, front, back, attack, attacklatency, approachlatency)) %>%mutate_at(vars(walk, jump, hole, hang, chew, groom), as.numeric))
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%
-select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%
-mutate_at(vars(walk, jump, hole, hang, chew, groom, still), ~ as.numeric(as.character(.)), na.rm=TRUE)
-summary(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	filter(!is.na(still))
-summary(test)
-str(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	filter(!is.na(still)) %>%#
-	mutate_at(vars(walk, jump, hole, hang, chew, groom, still), ~ as.numeric(as.character(.)), na.rm=TRUE)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	filter(!is.na(still)) %>%#
-	mutate_if(is.character, as.numeric)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	filter(!is.na(still)) %>%#
-	mutate(walk=as.numeric(walk))
-summary(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%
-select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%
-mutate(walk=as.numeric(walk))
-summary(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency))
-summary(test)
-str(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%
-select(-c(X, front, back, attack, attacklatency, approachlatency))
-str(test)
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%
-select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%
-mutate(walk=as.numeric(walk))
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	mutate(across(everything(), as.numeric))
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	mutate(across(c("walk"), as.numeric))
-test<-read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T) %>%#
-	select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%#
-	mutate(across(c("walk"), as.numeric), na.rm=TRUE)
-summary(test)
-str(test)
-assays<-read.csv("Trials.csv", header=T) %>%#
-	select(-c(front, back, attack, attacklatency, approachlatency)) %>%#
-	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X, front, back, attack, attacklatency, approachlatency)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below#
-	group_by(sq_id, trialdate) %>%#
-	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)#
-	filter(row_number()==1) %>%#
-	ungroup() %>%#
-	group_by(sq_id) %>%#
-	mutate(trialdate=ymd(trialdate)) %>%#
-	arrange(trialdate) %>%#
-	mutate(trialnumber=row_number())%>%#
-	ungroup() %>%#
-#converting the raw scores#
-	mutate(#
-	ageclass=ifelse(age==0, "J", #
-			ifelse(age==1, "Y", #
-			ifelse(age>1, "A",  ageclass))),#
-		squirrel_id=sq_id,#
-		age=as.numeric(age),#
-		walk=(walk/450), #
-		jump=(jump/450), #
-		hole=(hole/450), #
-		hang=(hang/450), #
-		chew=(chew/450), #
-		groom=(groom/450), #
-		still=(still/450)) %>%#
-	filter(!squirrel_id== 23686, #IT DOES NOT HAVE A SEX LISTED ANYWHERE!#
-	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) |front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% #
-	#attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds #
-	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks#
-	#this leaves squirrels with <=252 attacks (which also should be investigated)#
-	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt)) %>%#
-	droplevels()
-assays<-read.csv("Trials.csv", header=T) %>%#
-	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still", "front", "back", "attack", "attacklatency", "approachlatency"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below#
-	group_by(sq_id, trialdate) %>%#
-	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)#
-	filter(row_number()==1) %>%#
-	ungroup() %>%#
-	group_by(sq_id) %>%#
-	mutate(trialdate=ymd(trialdate)) %>%#
-	arrange(trialdate) %>%#
-	mutate(trialnumber=row_number())%>%#
-	ungroup() %>%#
-#converting the raw scores#
-	mutate(#
-	ageclass=ifelse(age==0, "J", #
-			ifelse(age==1, "Y", #
-			ifelse(age>1, "A",  ageclass))),#
-		squirrel_id=sq_id,#
-		age=as.numeric(age),#
-		walk=(walk/450), #
-		jump=(jump/450), #
-		hole=(hole/450), #
-		hang=(hang/450), #
-		chew=(chew/450), #
-		groom=(groom/450), #
-		still=(still/450),#
-		front=(front/300), #
-		back=(back/300), #
-		attack=(attack/300), #
-		attacklatency=(attacklatency/300), #
-		approachlatency=(approachlatency/300)) %>%#
-	filter(!squirrel_id== 23686, #IT DOES NOT HAVE A SEX LISTED ANYWHERE!#
-	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) | front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% #
-	#attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds #
-	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks#
-	#this leaves squirrels with <=252 attacks (which also should be investigated)#
-	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt)) %>%#
-	droplevels()
+#creating the assay datast we will be using here#
+#
 assays<-read.csv("Trials.csv", header=T) %>%#
 	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still", "front", "back", "attack", "attacklatency", "approachlatency"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below#
 	group_by(sq_id, trialdate) %>%#
@@ -198,9 +89,21 @@ assays<-read.csv("Trials.csv", header=T) %>%#
 	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks#
 	#this leaves squirrels with <=252 attacks (which also should be investigated)#
 	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt, front, back, attack, attacklatency, approachlatency)) %>%#
-	droplevels()
-(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
-nrow(assays) #1184
+	droplevels()#
+summary(assays)#
+head(assays)#
+#
+(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals#
+nrow(assays) #1184#
+#
+table(assays$sex, assays$ageclass)#
+table(assays$observer)#
+assays%>%filter(is.na(trialnumber))#
+assays %>% filter(squirrel_id== 13305)#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
 #total number of inds and sex stats#
 other_stats<-assays%>%#
 	group_by(squirrel_id)%>%#
@@ -264,7 +167,7 @@ axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%#
 head(axy)#
 #
 (axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals#
-nrow(axy) #37668
+nrow(axy) #37668#
 #conserved theme across plots#
 squirrel_theme <- theme_bw() +#
     theme(#legend.position = "top",#
@@ -279,6 +182,17 @@ squirrel_theme <- theme_bw() +#
       axis.text.y = element_text(size = 11, colour = "black"), #
       legend.title = element_text(size = 11, colour = "black"), #
       legend.text = element_text(size = 10, colour = "black"))
+#axy data for the complete dataset#
+#last edited Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+#
+#########################################
+#complete axy dataset, n=336 inds#
+#before merging with personality data#
+#########################################
+#
 axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%#
 	group_by(axy_id, squirrel_id) %>%#
   	mutate(#
@@ -307,8 +221,65 @@ axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%#
 	filter(row_number()==1) %>%  #selects first row!#
   ungroup() %>%#
   droplevels() %>%#
-  select(-c(total, total_obs, total_feeding, total_foraging, total_nestmoving, total_nestnotmoving, total_notmoving, total_travel))
-(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals
+  select(-c(total, total_obs, total_feeding, total_foraging, total_nestmoving, total_nestnotmoving, total_notmoving, total_travel))#
+#
+summary(axy1) #
+head(axy1)#
+#
+table(axy1$sex)#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals#
+nrow(axy1) #37668#
+#
+#deployment dates needed to calculate the exact number of sessions#
+(axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 852 sessions #
+#
+#year range#
+table(axy1$axy_yr)#
+#
+#sex stats#
+stats3<-axy1%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats3$sex)#
+#
+#ageclass stats#
+stats4<-axy1%>%group_by(squirrel_id, axy_ageclass)%>%filter(row_number()==1)#
+table(stats4$axy_ageclass)#
+table(stats4$axy_ageclass, stats4$sex) #
+#
+#ageclass stats#
+stats5<-axy1%>%group_by(squirrel_id, axy_ageclass)#
+table(stats5$axy_ageclass) #
+#
+#observers#
+#obs<-axy1%>%group_by(axy_id)%>%filter(row_number()==1) %>% group_by(f_observer) %>% mutate(sum=n())#
+#table(obs$f_observer)#
+#summary(obs$sum)#
+#
+#trial number by age class stats#
+ads<-axy1 %>% filter(axy_ageclass =="A") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+yrs<-axy1 %>% filter(axy_ageclass =="Y") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+juvs<-axy1 %>% filter(axy_ageclass =="J") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+#note: trial number is not reliable for adults or yearlings BECAUSE the count starts with the first trial - which may be during earlier phases (like an adult with 5 trials, could have had 3 of them done as a juvenile) - to get around this, I calculated sums after subsetting#
+#
+nrow(ads)#
+table(ads$sum, ads$sex)#
+#
+nrow(yrs)#
+table(yrs$sum, yrs$sex)#
+#
+nrow(juvs)#
+table(juvs$sum, juvs$sex)#
+#########################################
+# merged axy and personality dataset#
+# n=67#
+#########################################
+#
 axy2<- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
   group_by(axy_id)%>%#
   filter(row_number()==1) %>%#
@@ -316,8 +287,33 @@ axy2<- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
   select(-c(videodate, trialtime)) %>%#
   ungroup()#
 #
-head(axy2)
-(axy2) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
+head(axy2)#
+#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy2) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals#
+nrow(axy2) #8678#
+#
+table(axy2$axy_yr)#
+#
+stats5<-axy2%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats5$sex)#
+#
+#assay ageclass#
+stats6a<-axy2%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats6a$ageclass)#
+#
+#axy ageclass#
+stats6b<-axy2%>%group_by(squirrel_id, axy_ageclass)%>%filter(row_number()==1)#
+table(stats6b$axy_ageclass)#
+#########################################
+# merged axy and personality dataset#
+# filtered for matching ageclass, n=52#
+#########################################
+#
+#run filtered by ageclass#
 axy_ageclass <- dplyr::inner_join(assays, axy1, by=c("ageclass"="axy_ageclass", "squirrel_id"="squirrel_id", "sex"="sex")) %>%#
   droplevels()%>%#
   group_by(axy_id)%>%#
@@ -325,16 +321,61 @@ axy_ageclass <- dplyr::inner_join(assays, axy1, by=c("ageclass"="axy_ageclass", 
   select(-c(videodate, trialtime)) %>%#
   ungroup()#
 #
-head(axy_ageclass)
-(axy_ageclass) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #52 individuals
+head(axy_ageclass)#
+#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy_ageclass) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #52 individuals#
+nrow(axy_ageclass) #6722#
+#
+table(axy_ageclass $axy_yr)#
+#
+stats7<-axy_ageclass%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats7$sex)#
+#
+stats8<-axy_ageclass%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats8$ageclass) #assay ageclass = axy ageclass#
+#########################################
+# merged axy and personality dataset#
+# filtered for matching AGE, n=17#
+#########################################
+#
 #Run filtered by age #
 axy_age <- dplyr::inner_join(assays, axy1, by=c("ageclass"="axy_ageclass", "age"="axy_age", "squirrel_id"="squirrel_id", "sex"="sex")) %>%#
   droplevels()%>%#
   group_by(axy_id)%>%#
   filter(row_number()==1) %>%#
   select(-c(videodate, trialtime)) %>%#
-  ungroup()
-(axy_age) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #17 individuals
+  ungroup()#
+head(axy_age)  #
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy_age) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #17 individuals#
+nrow(axy_age) #1860#
+#
+table(axy_age $axy_yr)#
+#
+stats9<-axy_age%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats9$sex)#
+#
+stats10<-axy_age%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats10$ageclass) #assay ageclass = axy ageclass
+#PCA generation for OFT and MIS scores#
+#using all assays; OFT n = 809; MIS n = 791, and then subsetting for the final dataset (n=67)#
+#last edited Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+axy data subsets.R#
+#
+#########################################
+#Run assay PCA#
+#########################################
+#
 OFT<-assays%>%filter(!is.na(walk))#
 #
 names(OFT)#
@@ -364,44 +405,60 @@ personality_all<-assays%>%#
 	group_by(squirrel_id, trialnumber)%>%#
 	filter(row_number()==1) %>%#
 	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
-	select(-videodate,-trialtime)#
+	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)#
 #
 summary(personality_all)#
-head(personality_all)
-personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #882 individuals
-personality_all %>% as_tibble() %>% count(sex) %>% nrow() #2 sexes
-nrow(personality_all) #1184
+head(personality_all)#
+#
+personality_all%>%filter(is.na(age))#
+personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #882 individuals#
+personality_all %>% as_tibble() %>% count(sex) %>% nrow() #2 sexes#
+nrow(personality_all) #1184#
+#
+#########################################
+# merged axy and personality dataset#
+# n=67#
+#########################################
+#
 personality_67<-assays%>%#
 	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
 	inner_join(axy1, by=c("squirrel_id"="squirrel_id",  "sex"="sex")) %>%#
 	group_by(squirrel_id, trialnumber)%>%#
 	filter(row_number()==1) %>%#
 	ungroup() %>%#
-	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate, walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency)#
+	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)#
 summary(personality_67)	#
 head(personality_67)	#
-personality_67 %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
-personality_67<-assays%>%#
-	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
-	inner_join(axy1, by=c("squirrel_id"="squirrel_id",  "sex"="sex")) %>%#
-	group_by(squirrel_id, trialnumber)%>%#
-	filter(row_number()==1) %>%#
-	ungroup() %>%#
-	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate, walk, jump, hole, hang, chew, groom, still)
-personality_67 %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
+personality_67 %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals#
+#########################################
+# merged axy and personality dataset#
+# filtered for matching ageclass, n=52#
+#########################################
+#
 personality_52<-assays%>%#
 	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
 	inner_join(axy1, by=c("ageclass"="axy_ageclass", "squirrel_id"="squirrel_id", "sex"="sex")) %>%#
 	group_by(squirrel_id, trialnumber)%>%#
 	filter(row_number()==1) %>%#
 	ungroup() %>%#
-	select(squirrel_id, OFT1, OFT2, observer, ageclass, sex, cohort, year, age, grid, trialnumber, trialdate, walk, jump, hole, hang, chew, groom, still)#
+	select(squirrel_id, OFT1, OFT2, observer, ageclass, sex, cohort, year, age, grid, trialnumber, trialdate)#
 summary(personality_52)	#
 head(personality_52)	#
 personality_52 %>% as_tibble() %>% count(squirrel_id) %>% nrow() #52 individuals
+#PCA calculcations for axy behaviours #
+#last updated Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+axy data subsets.R#
+#########################################
+#complete axy dataset, n=250 inds#
+#before merging with personality data#
+#########################################
+#
 colnames(axy1)#
 #
-PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoveing", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)#
+PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)#
 summary(PCaxys1) #
 PCaxys1#
 ##PC1: feeding, foraging, -nestnotmoving, travel#
@@ -409,26 +466,50 @@ PCaxys1#
 ##PC3: nestmoveing, notmoving#
 #
 #add PCs to dataset#
-axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]#
-axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]
-PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)
-summary(PCaxys1)
-axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]#
-axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoveing + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]
 axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]#
-axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]
-library(magrittr)#
-library(krsp)#
+axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]#
+####testing ageclass issues#
+#test_axys<-axys1%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+#test_raxys<-r_axys1%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+#test_adults327<-adult_axys327%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+#
+#check ageclass summaries#
+#table(test_axys$axy_ageclass) #212 A, 4 J, 111 Y#
+#table(test_raxys$axy_ageclass) #195 A, 4 J, 128 Y (loss of 17A/gain 17Y)#
+#table(test_adults327$axy_ageclass) #219 A (gained 7)#
+#
+#where are the extra individuals coming from?#
+#axys1%>%filter(squirrel_id==19583) #36 records, 6 when sq is A#
+#r_axys1%>%filter(squirrel_id==19583) #36 records, 6 when sq is A#
+#adult_axys327%>%filter(squirrel_id==19583) #6 records total#
+#
+#test_axys%>%filter(squirrel_id==19583) #1 record, sq is Y#
+#test_raxys%>%filter(squirrel_id==19583) #1 record, sq is Y, different trialdate than in axys(b/c of ordering by date)#
+#test_adults327%>%filter(squirrel_id==19583) #1 record, sq now shows up as adult & different trialdate#
+#
+#suggested that this squirrel (and the others listed) get ignored when we use the filter(row_number()==1) code bc the adult records are NOT the first row (at least in the r_axys1 file)#
+#but overall the actual nrow() counts are consistent between r_axys1 and axys1#
+#and actual records of A squirrels are consistent across the three datasets
+#code to calculate local density#
+#original code by E. R. Siracusa#
+#last updated on Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+axy data subsets.R#
+PCA Generation Code - Assays.R#
 #
 distance <- 130 #establish your radius for collecting neighbourhood data#
 neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in#
 #
 #Connect to database - replace with your username below#
+#
+#APRIL's connection to database#
 con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com",#
                   dbname ="krsp",#
              user="amartinig",#
            password = keyring::key_get("krsp")#
-)  #
+)
 #Bring in the census - depending on what data you're working with you may need the dbamidden file or the census file or both#
 #
 new.census = tbl(con, "census") %>%#
@@ -477,7 +558,7 @@ missed<-data.frame(#
 	Ft=c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),#
 	year=c(2014, 2017, 2010, 2005, 2009, 2005, 2017, 2019, 2018, 2018, 2018, 2019, 2018, 2017, 2017, 2018, 2018, 2018, 2018, 2019, 2005, 2005, 2005, 2005, 2008, 2009, 2005, 2008, 2008, 2008, 2008, 2010, 2010, 2010, 2012, 2012, 2019, 2016, 2019, 2019, 2016, 2015, 2015, 2018, 2015, 2015, 2019, 2015, 2015, 2017, 2018, 2017, 2017, 2017, 2018, 2017, 2017, 2018, 2017, 2019, 2019, 2018, 2017, 2018, 2018, 2017, 2017, 2019, 2019, 2017, 2017, 2017, 2017, 2017, 2019, 2018, 2019, 2018),#
 	month=c(5, 5, 6, 8, 7, 8, 5, 8, 7, 7, 7, 8, 7, 5, 7, 7, 7, 7, 7, 7, 8, 5, 8, 8, 5, 8, 7, 5, 5, 5, 5, 5, 5, 5, 7, 5, 4, 7, 4, 4, 8, 9, 9, 8, 5, 9, 4, 8, 9, 9, 9, 8, 8, 9, 8, 9, 9, 8, 9, 8, 8, 8, 9, 8, 8, 9, 9, 8, 9, 9, 9, 9, 9, 9, 9, 9, 8, 9),#
-	sex=c("F", "F", "M", "M", "M", "F", "F", "F", "M", "F", "M", "F", "M", "F", "F", "F", "M", "M", "F", "F", "M", "M", "M", "F", "M", "F", "F", "M", "M", "M", "M", "M", "M", "M", "M", "F", "M", "F", "M", "M", "F", "F", "F", "M", "F", "M", "M", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "M", "F", "F", "F", "F", "F", "F", "F", "M", "F", "F",  "F", "F", "F", "F", "F", "M", "F", "F"))
+	sex=c("F", "F", "M", "M", "M", "F", "F", "F", "M", "F", "M", "F", "M", "F", "F", "F", "M", "M", "F", "F", "M", "M", "M", "F", "M", "F", "F", "M", "M", "M", "M", "M", "M", "M", "M", "F", "M", "F", "M", "M", "F", "F", "F", "M", "F", "M", "M", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "F", "M", "F", "F", "F", "F", "F", "F", "F", "M", "F", "F",  "F", "F", "F", "F", "F", "M", "F", "F"))#
 #Bind these back together#
 census <- rbind(old.census, censuspre16,censusfall16,censuspost17,missed) %>%#
 	group_by(squirrel_id, year, month) %>% #need to include month here so that we capture both may and august census data#
@@ -497,12 +578,13 @@ census <- rbind(old.census, censuspre16,censusfall16,censuspost17,missed) %>%#
 	ifelse(squirrel_id==11020 & year==2013, 12, #
 	ifelse(squirrel_id==21496 & year==2015, 2, #
 	locY)))))  %>%#
-	ungroup()
+	ungroup() #
+#
 #Create a census file with just may and august data to make it easier to match up with axy and assay data#
 census_forcombining <- census %>%#
 	filter(month==4 | month==5 | month==6 | month==7 | month==8 | month==9 | month==10) %>%#
 	mutate(month = ifelse(month <= 6,  5, #
-		ifelse(month >= 7, 8, month)))
+		ifelse(month >= 7, 8, month)))#
 ###################################################
 ##generate combined dataset for assays ------#
 ###################################################
@@ -516,7 +598,7 @@ min_info_assay<-personality_all %>% #
 		filter(row_number()==1) %>%#
 		ungroup()%>%#
 		select(squirrel_id, year, trialdate, grid, trial_month) #
-(min_info_assay) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #811 inds
+(min_info_assay) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #811 inds#
 min_info_assay %<>%#
 #make sure all of the assay months are either May or August#
 	mutate(trial_month = #
@@ -597,7 +679,7 @@ missing<-assay_local_density %>%#
 	select(squirrel_id, year, trialdate, trial_month, date=date.y, reflo=reflo.y, locX=locX.y, locY=locY.y, Ft, assay.local.density, grid)#
 summary(missing)#
 nrow(missing) #
-head(missing)
+head(missing)#
 assay_local_density %<>% #
 	filter(!is.na(reflo))#
 assay_local_density<-rbind(assay_local_density, missing)	#
@@ -641,7 +723,7 @@ min_info_axy<-axy1 %>% #
 		group_by(squirrel_id, axy_yr) %>% #only need to keep 1 record per squirrel per assay year and axy year#
 		filter(row_number()==1) %>%#
 		ungroup()%>%#
-		select(squirrel_id, axy_yr, axy_date, grid, axy_month) #
+		select(squirrel_id, axy_yr, axy_date, axy_month) #
 (min_info_axy) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds#
 min_info_axy %<>%#
 #make sure all of the months are either May or August#
@@ -661,7 +743,6 @@ nrow(min_info_axy) #327#
 axy_local_density <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squirrel_id", "axy_yr"="year", "axy_month"="month")) %>% #
 	mutate(axy.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density#
 		date = as.character(date),#
-		grid=grid.x,#
 		axy_month=month(axy_date),#
 		census_month=month(date),#
 		locX=#
@@ -672,7 +753,7 @@ axy_local_density <- left_join(min_info_axy, census_forcombining, by=c("squirrel
 			ifelse(squirrel_id==11537, 2.5, locY))) %>%#
 	mutate(date=ifelse(squirrel_id==11537, "2014-05-15", date)) %>%#
 	mutate(date = ymd(date)) %>%#
-	select(-c(grid.x, grid.y, sex)) %>%#
+	select(-c(sex)) %>%#
 #squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	#
 	filter(!(squirrel_id == 19257 & reflo == "E7"),#
 		!(squirrel_id == 10355 & reflo == "Q6"), #
@@ -686,8 +767,8 @@ axy_local_density<-axy_local_density %>% mutate(axy_month = #
 		ifelse(axy_month>=7 & census_month==9, 9,#
 		 	axy_month)))))))#
 summary(axy_local_density)#
-(axy_local_density) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds#
-nrow(axy_local_density) #327#
+(axy_local_density) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #335 inds#
+nrow(axy_local_density) #428#
 ###################################################
 #density for the axys ------#
 ###################################################
@@ -716,68 +797,605 @@ for (i in 1:n_f) {#
 #clean dataset with local density for axys#
 clean_axy_d<-axy_local_density%>%select(c(squirrel_id, axy_yr, axy.local.density))#
 summary(clean_axy_d)
-min_info_axy<-axy1 %>% #
-		ungroup() %>% #
-		mutate(axy_month = month(axy_date)) %>%#
-		group_by(squirrel_id, axy_yr) %>% #only need to keep 1 record per squirrel per assay year and axy year#
-		filter(row_number()==1) %>%#
-		ungroup()%>%#
-		select(squirrel_id, axy_yr, axy_date, axy_month)
-min_info_axy %<>%#
-#make sure all of the months are either May or August#
-	mutate(axy_month = #
-		ifelse(axy_month <= 6, 5, #
-		ifelse(axy_month >= 7, 8, axy_month)))
-axy_local_density <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squirrel_id", "axy_yr"="year", "axy_month"="month")) %>% #
+#code to calculate familiarity scores (assays dataset)#
+#original code by E. R. Siracusa#
+#last updated on Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+focal data subsets.R#
+local density.R#
+#
+assay.neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in#
+###################################################
+##generate combined dataset for assays ------#
+###################################################
+#
+assay_fam <- left_join(min_info_assay, census_forcombining, by=c("squirrel_id"="squirrel_id", "year"="year", "trial_month"="month")) %>% #
+	mutate(assay.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density#
+		date = as.character(date),#
+		grid=grid.x,#
+		locX = #
+			ifelse(squirrel_id==10135 & year == "2005", 14,#
+			ifelse(squirrel_id==12705 & reflo=="G10.", 7.0,#
+			ifelse(squirrel_id==10192 & year=="2009", 9.2,	#
+			locX))),	#
+		locY=#
+			ifelse(squirrel_id==10135 & year=="2005", 9,#
+			ifelse(squirrel_id==12705 & reflo=="G10.", 10.5,#
+			ifelse(squirrel_id==10192 & year =="2009", 4.9,#
+			locY))),#
+	    reflo=#
+	    	ifelse(squirrel_id==10135 & year=="2005","N9", 				#
+	    	ifelse(squirrel_id==12210 & year=="2013", "-49",#
+	    	ifelse(squirrel_id==10192 & 	year=="2009", "I5",#
+	    reflo)))) %>%#
+	mutate(date=#
+		ifelse(squirrel_id==10135 & year=="2005", "2005-08-15", #
+		ifelse(squirrel_id==10192 & year =="2009","2009-05-15",#
+		date))) %>%#
+	mutate(date = ymd(date)) %>%#
+	select (-c(grid.x, grid.y, sex)) %>%#
+#squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	#
+	filter(!(squirrel_id == 6500 & date == "2005-06-15"),#
+		!(squirrel_id == 6569 & date == "2005-06-26"),#
+		!(squirrel_id == 8468 & date == "2008-06-26"),#
+		!(squirrel_id == 10343 & date == "2009-08-15"),#
+		!(squirrel_id == 10370 & date == "2008-05-15"),#
+		!(squirrel_id == 10376 & date == "2009-08-15"),#
+		!(squirrel_id == 10405 & date == "2009-05-15"),#
+		!(squirrel_id == 10467 & date == "2008-08-15"),#
+		!(squirrel_id == 10661 & date == "2009-08-15"),#
+		!(squirrel_id == 11081 & date == "2009-08-15"),#
+		!(squirrel_id == 11201 & date == "2010-06-14"),#
+		!(squirrel_id == 11254 & date == "2009-08-15"),#
+		!(squirrel_id == 11266 & date == "2010-05-15"),#
+		!(squirrel_id == 11282 & date == "2010-06-14"),#
+		!(squirrel_id == 11882 & date == "2010-05-15"),#
+		!(squirrel_id == 13664 & date == "2009-08-15"),#
+		!(squirrel_id == 21944 & date == "2019-10-01")) #
+#
+missings<-assay_fam %>%#
+	filter(is.na(reflo)) %>%#
+	left_join(mothers, by=c("squirrel_id"="juv_id", "year"="cohort", "trial_month"="month")) %>%#
+	select(squirrel_id, year, trialdate, trial_month, date=date.y, reflo=reflo.y, locX=locX.y, locY=locY.y, Ft, assay.local.density, grid)#
+summary(missings)#
+nrow(missings) #
+head(missings)#
+#
+assay_fam %<>% #
+	filter(!is.na(reflo))#
+assay_fam<-rbind(assay_fam, missings)	#
+summary(assay_fam)#
+(assay_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #822 inds#
+nrow(assay_fam) #944#
+#
+############################
+#familiarity for assays ------#
+############################
+#
+n_a <- length(assay_fam$squirrel_id) #This is the length of your data (i.e. the squirrels that you want to create neighbourhoods and calculate density for). You can substitute squirrel_id for any column. This is the data the code below will loop through. #
+#
+#for assays#
+for (j in 1:n_a) {#
+	print(j)#
+	#this selects neighbours in the same grid, year, month and within 130 m of your focal individual.#
+	neighbours <- subset(census, #
+		census$grid==assay_fam$grid[j] & #
+		census$year==assay_fam$year[j] & #
+		census$month==assay_fam$trial_month[j] & (30*assay_fam$locX[j]-30*census$locX)^2+(30*assay_fam$locY[j]-30*census$locY)^2<=(distance)^2)#
+	#this makes sure your focal squirrel is not included in your neighbours.#
+	neighbours <- subset(neighbours, !neighbours$squirrel_id==assay_fam$squirrel_id[j])#
+	#Add an if/else clause to deal with squirrels that were off grid and therefore have 0 neighbours… as this causes the loop to fail. We are inputting NAs for the average familiarity for these individuals	#
+	if(length(neighbours$squirrel_id > 0)){#
+		#this creates new columns in your 'neighbours' dataframe so that you can identify which focal individual you just created a neighbourhood for and adds back some of the information about the focal individual#
+		neighbours$Focal.ID <- assay_fam$squirrel_id[j]#
+		neighbours$Focal.locX <- assay_fam$locX[j]#
+		neighbours$Focal.locY <- assay_fam$locY[j]#
+		neighbours$Focal.reflo <- assay_fam$reflo[j]#
+		neighbours$Focal.Date <- assay_fam$date[j]#
+		#make sure neighbours aren't duplicated (i.e. because an individual has more than one primary midden) - this shouldn't happen because of how we subsetted the census data above #
+		neighbours %<>% filter(!duplicated(squirrel_id))#
+		#Calculate Distance			#
+		n <- length(neighbours$Focal.ID)#
+		for(k in 1:n){#
+			dis <- sqrt((30*(neighbours$Focal.locX[k])-30*(neighbours$locX[k]))^2+(30*(neighbours$Focal.locY[k])-30*(neighbours$locY[k]))^2)#
+			neighbours[k,"Nbor.dis"] <- dis#
+		}	#
+		#this serves as a double check and helps catch any mistakes in the database where two squirrels were assigned the same primary midden				#
+		neighbours %<>% filter(Nbor.dis > 0)#
+		#Calculate Familiarity - here we are going to cycle through each neighbour and see how long the focal squirrel and neighbouring squirrel have occupied their current territories next to each other#
+		n <- length(neighbours$Focal.ID)#
+		for(i in 1:n){#
+			#this selects only census information that is on or before the date that you want to calculate familiarity from	#
+			fam1 <- subset(census, census$date<=neighbours$Focal.Date[i])#
+			#select all instances where the focal squirrel lived at this reflo#
+			fam2 <- subset(fam1, fam1$squirrel_id==neighbours$Focal.ID[i] & fam1$reflo==neighbours$Focal.reflo[i])#
+			#because we have juveniles for whom we are using mom's midden as their "home" there will be instances where the focal squirrel is not found in the census before the date of interest. This will cause a -Inf in the data. These should be zeros in the data#
+			if(nrow(fam2)==0){#
+				own <- neighbours$Focal.Date[i]#
+			} else {#
+				#select the earliest date that that the focal squirrel lived at this reflo#
+				own <- min(fam2$date)#
+			}#
+			#select all instances where the neighbouring squirrel lived at this reflo#
+			fam3 <- subset(fam1, fam1$squirrel_id==neighbours$squirrel_id[i] & fam1$reflo==neighbours$reflo[i])#
+			#if the neighbour was censused after the focal squirrel sometimes the neighbour was only present at the current midden after the date of interest. In this case the neighbour will not show up in the fam3 dataframe and there will be no minimum date at which the neighbour first occupied their neighbouring midden, leading to a -Inf in the data. This code solves that issue#
+			if(nrow(fam3) == 0){#
+				nbor <- neighbours$Focal.Date[i]#
+			} else{#
+				#selet the earliest date that the neighbouring squirrel lived at this reflo#
+				nbor <- min(fam3$date)#
+			}#
+			#take the latest date of these two (this is the earliest date that these individuals lived next to each other  -- it does not take into account the possibility that the neighbouring squirrel moved from another nearby midden, but anecdotal evidence from the field suggests that anytime a neighbour moves to another nearby midden the surrounding squirrels treat that individual as a "new" neighbour)#
+			f <- max(own,nbor)#
+			#subtract this date from the current date to get the length of time these individuals have lived next to each other#
+			f <- neighbours$Focal.Date[i]-f#
+			neighbours[i,"Nbor.familiarity"] <- f#
+		}#
+		#NOTE: Because neighbours are occassionally censused in the same month but a few days after the 'owner' this code occassionally creates negative familiarity values. For example if the owner census date is May 15, 2001 and the neighbour census date is May 17, 2001, and the first date that both squirrels are observed on neighbouring middens is May 17, 2001 this will lead to a negative familarity value of -2 (May 15, 2001 - May 17, 2001). To avoid these negative familiarity values you can change all negative values to zeros using the code below. This is a rough approximation but appropriate given that our measure of familiarity is also an approximation (i.e. familiarity is only updated twice per year).#
+		#neighbours %<>% #
+		#	mutate(Nbor.ten = ifelse(Nbor.ten < 0, 0, Nbor.ten))#
+		#As discussed above- turn NA's into 0's since these instances represent cases where the neighboring individual was censused AFTER the focal and had no other entries in the census prior... meaning this neighbour and the focal individual's familiarity was 0 at the time#
+		neighbours %<>%#
+			mutate(Nbor.familiarity = ifelse(is.na(Nbor.familiarity), 0, Nbor.familiarity))#
+		#Calculate averages for the neighbourhood	#
+		Avg.familiarity = mean(neighbours$Nbor.familiarity, na.rm=T)#
+		#Put it all together #
+		assay_fam[j,"assay_avg_fam"] <- Avg.familiarity #
+	} else{#
+		assay_fam[j,"assay_avg_fam"] <- NA#
+	}#
+}#
+#
+clean_assay_h<-assay_fam %>% select(c(year, squirrel_id, assay_avg_fam)) %>% mutate(assay_avg_fam=ifelse(is.na(assay_avg_fam), 0, assay_avg_fam))#
+#
+clean_assay<-left_join(clean_assay_d, clean_assay_h,  by=c("squirrel_id"="squirrel_id", "year"="year"))
+#code to calculate familiarity scores (assays dataset)#
+#original code by E. R. Siracusa#
+#last updated on Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+focal data subsets.R#
+local density.R#
+#
+assay.neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in#
+###################################################
+##generate combined dataset for assays ------#
+###################################################
+#
+assay_fam <- left_join(min_info_assay, census_forcombining, by=c("squirrel_id"="squirrel_id", "year"="year", "trial_month"="month")) %>% #
+	mutate(assay.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density#
+		date = as.character(date),#
+		grid=grid.x,#
+		locX = #
+			ifelse(squirrel_id==10135 & year == "2005", 14,#
+			ifelse(squirrel_id==12705 & reflo=="G10.", 7.0,#
+			ifelse(squirrel_id==10192 & year=="2009", 9.2,	#
+			locX))),	#
+		locY=#
+			ifelse(squirrel_id==10135 & year=="2005", 9,#
+			ifelse(squirrel_id==12705 & reflo=="G10.", 10.5,#
+			ifelse(squirrel_id==10192 & year =="2009", 4.9,#
+			locY))),#
+	    reflo=#
+	    	ifelse(squirrel_id==10135 & year=="2005","N9", 				#
+	    	ifelse(squirrel_id==12210 & year=="2013", "-49",#
+	    	ifelse(squirrel_id==10192 & 	year=="2009", "I5",#
+	    reflo)))) %>%#
+	mutate(date=#
+		ifelse(squirrel_id==10135 & year=="2005", "2005-08-15", #
+		ifelse(squirrel_id==10192 & year =="2009","2009-05-15",#
+		date))) %>%#
+	mutate(date = ymd(date)) %>%#
+	select (-c(grid.x, grid.y, sex)) %>%#
+#squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	#
+	filter(!(squirrel_id == 6500 & date == "2005-06-15"),#
+		!(squirrel_id == 6569 & date == "2005-06-26"),#
+		!(squirrel_id == 8468 & date == "2008-06-26"),#
+		!(squirrel_id == 10343 & date == "2009-08-15"),#
+		!(squirrel_id == 10370 & date == "2008-05-15"),#
+		!(squirrel_id == 10376 & date == "2009-08-15"),#
+		!(squirrel_id == 10405 & date == "2009-05-15"),#
+		!(squirrel_id == 10467 & date == "2008-08-15"),#
+		!(squirrel_id == 10661 & date == "2009-08-15"),#
+		!(squirrel_id == 11081 & date == "2009-08-15"),#
+		!(squirrel_id == 11201 & date == "2010-06-14"),#
+		!(squirrel_id == 11254 & date == "2009-08-15"),#
+		!(squirrel_id == 11266 & date == "2010-05-15"),#
+		!(squirrel_id == 11282 & date == "2010-06-14"),#
+		!(squirrel_id == 11882 & date == "2010-05-15"),#
+		!(squirrel_id == 13664 & date == "2009-08-15"),#
+		!(squirrel_id == 21944 & date == "2019-10-01")) #
+#
+missings<-assay_fam %>%#
+	filter(is.na(reflo)) %>%#
+	left_join(mothers, by=c("squirrel_id"="juv_id", "year"="cohort", "trial_month"="month")) %>%#
+	select(squirrel_id, year, trialdate, trial_month, date=date.y, reflo=reflo.y, locX=locX.y, locY=locY.y, Ft, assay.local.density, grid)#
+summary(missings)#
+nrow(missings) #
+head(missings)#
+#
+assay_fam %<>% #
+	filter(!is.na(reflo))#
+assay_fam<-rbind(assay_fam, missings)	#
+summary(assay_fam)#
+(assay_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #822 inds#
+nrow(assay_fam) #944#
+#
+############################
+#familiarity for assays ------#
+############################
+#
+n_a <- length(assay_fam$squirrel_id) #This is the length of your data (i.e. the squirrels that you want to create neighbourhoods and calculate density for). You can substitute squirrel_id for any column. This is the data the code below will loop through. #
+#
+#for assays#
+for (j in 1:n_a) {#
+	print(j)#
+	#this selects neighbours in the same grid, year, month and within 130 m of your focal individual.#
+	neighbours <- subset(census, #
+		census$grid==assay_fam$grid[j] & #
+		census$year==assay_fam$year[j] & #
+		census$month==assay_fam$trial_month[j] & (30*assay_fam$locX[j]-30*census$locX)^2+(30*assay_fam$locY[j]-30*census$locY)^2<=(distance)^2)#
+	#this makes sure your focal squirrel is not included in your neighbours.#
+	neighbours <- subset(neighbours, !neighbours$squirrel_id==assay_fam$squirrel_id[j])#
+	#Add an if/else clause to deal with squirrels that were off grid and therefore have 0 neighbours… as this causes the loop to fail. We are inputting NAs for the average familiarity for these individuals	#
+	if(length(neighbours$squirrel_id > 0)){#
+		#this creates new columns in your 'neighbours' dataframe so that you can identify which focal individual you just created a neighbourhood for and adds back some of the information about the focal individual#
+		neighbours$Focal.ID <- assay_fam$squirrel_id[j]#
+		neighbours$Focal.locX <- assay_fam$locX[j]#
+		neighbours$Focal.locY <- assay_fam$locY[j]#
+		neighbours$Focal.reflo <- assay_fam$reflo[j]#
+		neighbours$Focal.Date <- assay_fam$date[j]#
+		#make sure neighbours aren't duplicated (i.e. because an individual has more than one primary midden) - this shouldn't happen because of how we subsetted the census data above #
+		neighbours %<>% filter(!duplicated(squirrel_id))#
+		#Calculate Distance			#
+		n <- length(neighbours$Focal.ID)#
+		for(k in 1:n){#
+			dis <- sqrt((30*(neighbours$Focal.locX[k])-30*(neighbours$locX[k]))^2+(30*(neighbours$Focal.locY[k])-30*(neighbours$locY[k]))^2)#
+			neighbours[k,"Nbor.dis"] <- dis#
+		}	#
+		#this serves as a double check and helps catch any mistakes in the database where two squirrels were assigned the same primary midden				#
+		neighbours %<>% filter(Nbor.dis > 0)#
+		#Calculate Familiarity - here we are going to cycle through each neighbour and see how long the focal squirrel and neighbouring squirrel have occupied their current territories next to each other#
+		n <- length(neighbours$Focal.ID)#
+		for(i in 1:n){#
+			#this selects only census information that is on or before the date that you want to calculate familiarity from	#
+			fam1 <- subset(census, census$date<=neighbours$Focal.Date[i])#
+			#select all instances where the focal squirrel lived at this reflo#
+			fam2 <- subset(fam1, fam1$squirrel_id==neighbours$Focal.ID[i] & fam1$reflo==neighbours$Focal.reflo[i])#
+			#because we have juveniles for whom we are using mom's midden as their "home" there will be instances where the focal squirrel is not found in the census before the date of interest. This will cause a -Inf in the data. These should be zeros in the data#
+			if(nrow(fam2)==0){#
+				own <- neighbours$Focal.Date[i]#
+			} else {#
+				#select the earliest date that that the focal squirrel lived at this reflo#
+				own <- min(fam2$date)#
+			}#
+			#select all instances where the neighbouring squirrel lived at this reflo#
+			fam3 <- subset(fam1, fam1$squirrel_id==neighbours$squirrel_id[i] & fam1$reflo==neighbours$reflo[i])#
+			#if the neighbour was censused after the focal squirrel sometimes the neighbour was only present at the current midden after the date of interest. In this case the neighbour will not show up in the fam3 dataframe and there will be no minimum date at which the neighbour first occupied their neighbouring midden, leading to a -Inf in the data. This code solves that issue#
+			if(nrow(fam3) == 0){#
+				nbor <- neighbours$Focal.Date[i]#
+			} else{#
+				#selet the earliest date that the neighbouring squirrel lived at this reflo#
+				nbor <- min(fam3$date)#
+			}#
+			#take the latest date of these two (this is the earliest date that these individuals lived next to each other  -- it does not take into account the possibility that the neighbouring squirrel moved from another nearby midden, but anecdotal evidence from the field suggests that anytime a neighbour moves to another nearby midden the surrounding squirrels treat that individual as a "new" neighbour)#
+			f <- max(own,nbor)#
+			#subtract this date from the current date to get the length of time these individuals have lived next to each other#
+			f <- neighbours$Focal.Date[i]-f#
+			neighbours[i,"Nbor.familiarity"] <- f#
+		}#
+		#NOTE: Because neighbours are occassionally censused in the same month but a few days after the 'owner' this code occassionally creates negative familiarity values. For example if the owner census date is May 15, 2001 and the neighbour census date is May 17, 2001, and the first date that both squirrels are observed on neighbouring middens is May 17, 2001 this will lead to a negative familarity value of -2 (May 15, 2001 - May 17, 2001). To avoid these negative familiarity values you can change all negative values to zeros using the code below. This is a rough approximation but appropriate given that our measure of familiarity is also an approximation (i.e. familiarity is only updated twice per year).#
+		#neighbours %<>% #
+		#	mutate(Nbor.ten = ifelse(Nbor.ten < 0, 0, Nbor.ten))#
+		#As discussed above- turn NA's into 0's since these instances represent cases where the neighboring individual was censused AFTER the focal and had no other entries in the census prior... meaning this neighbour and the focal individual's familiarity was 0 at the time#
+		neighbours %<>%#
+			mutate(Nbor.familiarity = ifelse(is.na(Nbor.familiarity), 0, Nbor.familiarity))#
+		#Calculate averages for the neighbourhood	#
+		Avg.familiarity = mean(neighbours$Nbor.familiarity, na.rm=T)#
+		#Put it all together #
+		assay_fam[j,"assay_avg_fam"] <- Avg.familiarity #
+	} else{#
+		assay_fam[j,"assay_avg_fam"] <- NA#
+	}#
+}#
+#
+clean_assay_h<-assay_fam %>% select(c(year, squirrel_id, assay_avg_fam)) %>% mutate(assay_avg_fam=ifelse(is.na(assay_avg_fam), 0, assay_avg_fam))#
+#
+clean_assay<-left_join(clean_assay_d, clean_assay_h,  by=c("squirrel_id"="squirrel_id", "year"="year"))
+#code to calculate familiarity scores (axys dataset)#
+#original code by E. R. Siracusa#
+#last updated on Feb 13, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+axy data subsets.R#
+local density.R#
+#
+axy.neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in#
+#
+###################################################
+##generate combined dataset for axys ------#
+###################################################
+#
+axy_fam <- left_join(min_info_axy, census_forcombining, by=c("squirrel_id"="squirrel_id", "axy_yr"="year", "axy_month"="month")) %>% #
+	select(-axy_month) %>% #axy_month had been set to either May or August for ease of matching it up with the census data#
 	mutate(axy.local.density = as.numeric(0), #this creates a new column in which to store your calculated local density#
 		date = as.character(date),#
-		axy_month=month(axy_date),#
-		census_month=month(date),#
-		locX=#
-			ifelse(squirrel_id==13412, -7.7,#
-			ifelse(squirrel_id==11537, 15.3, locX)), #
-		locY=#
-			ifelse(squirrel_id==13412, 12.7, #
-			ifelse(squirrel_id==11537, 2.5, locY))) %>%#
-	mutate(date=ifelse(squirrel_id==11537, "2014-05-15", date)) %>%#
-	mutate(date = ymd(date)) %>%#
+		axy_month = month(axy_date), #use the actual month that the axy was conducted to calculate familiarity accurately#
+        	census_month=month(date),#
+        locX=ifelse(squirrel_id==13412, -7.7, locX),#
+		locY=ifelse(squirrel_id==13412, 12.7, locY)) %>% #
+	mutate(date = ymd(date),#
+	axy_month = #
+		ifelse(axy_month==3 & census_month==4, 4,#
+		ifelse(axy_month<=6 & census_month==5, 5,#
+		ifelse(axy_month==8 & census_month==5, 5,#
+		ifelse(axy_month <=6 & census_month==6, 8, #must be August because there are no other census records that month and it breaks the loop if I leave it as June#
+		ifelse(axy_month>=7 & census_month==8, 8,#
+		ifelse(axy_month>=7 & census_month==9, 9,#
+		 	axy_month))))))) %>%#
 	select(-c(sex)) %>%#
 #squirrels with two spring OR two fall census records, keep only census record closest to august or may in the season (e.g., if there was a census in august and september, we kept the august record)	#
 	filter(!(squirrel_id == 19257 & reflo == "E7"),#
 		!(squirrel_id == 10355 & reflo == "Q6"), #
-		!(squirrel_id == 12435 & reflo == "K12"))
-axy_local_density<-axy_local_density %>% mutate(axy_month = #
-		ifelse(axy_month==3 & census_month==4, 4,#
-		ifelse(axy_month<=6 & census_month==5, 5,#
-		ifelse(axy_month>=7 & census_month==5, 5,#
-		ifelse(axy_month<=6 & census_month==6, 6,#
-		ifelse(axy_month>=7 & census_month==8, 8,#
-		ifelse(axy_month>=7 & census_month==9, 9,#
-		 	axy_month)))))))
-summary(axy_local_density)#
-(axy_local_density) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #250 inds#
-nrow(axy_local_density) #327
-n_f <- length(axy_local_density$squirrel_id) #This is the length of your data (i.e. the squirrels that you want to create neighbourhoods and calculate density for). You can substitute squirrel_id for any column. This is the data the code below will loop through.#
+		!(squirrel_id == 12435 & reflo == "K12")) #
 #
-for (i in 1:n_f) {#
-	print(i)#
+summary(axy_fam)#
+(axy_fam) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #335 inds#
+nrow(axy_fam) #428#
+############################
+#familiarity for axys ------#
+############################
+#
+n_f <- length(axy_fam$squirrel_id) #This is the length of your data (i.e. the squirrels that you want to create neighbourhoods and calculate density for). You can substitute squirrel_id for any column. This is the data the code below will loop through. #
+#for axys#
+for (j in 1:n_f) {#
+	print(j)#
+	#this selects neighbours in the same grid, year, month and within 130 m of your axy individual.#
 	neighbours <- subset(census, #
-	census$grid== axy_local_density$grid[i] & #
-	census$year== axy_local_density$axy_yr[i] & #
-	census$month== axy_local_density$axy_month[i] & #
-	(30*axy_local_density$locX[i]-30*census$locX)^2+(30*axy_local_density$locY[i]-30*census$locY)^2<=(distance)^2) #
-	#This selects neighbours in the same grid, year, month and within 130 m of your axy individual.#
-#
-	#this creates a column in your new 'neighbours' dataframe so that you can identify which axy individual you just created a neighbourhood for. #
-	neighbours <- subset(neighbours, !neighbours$squirrel_id==axy_local_density$squirrel_id[i]) #
+		census$grid==axy_fam$grid[j] & #
+		census$year==axy_fam$axy_yr[j] & #
+		census$month==axy_fam$axy_month[j] & (30*axy_fam$locX[j]-30*census$locX)^2+(30*axy_fam$locY[j]-30*census$locY)^2<=(distance)^2)#
 	#this makes sure your axy squirrel is not included in your neighbours.#
-	#Calculate Density (squirrels per hectare: 53,092 m2 = 5.3 hectares)#
-	num.indiv <-  length(unique(neighbours$squirrel_id))#
-	density <- num.indiv/((pi*distance^2)/10000)#
-	#Put it all together#
-	axy_local_density[i,"axy.local.density"] <- density#
+	neighbours <- subset(neighbours, !neighbours$squirrel_id==axy_fam$squirrel_id[j])#
+	#Add an if/else clause to deal with squirrels that were off grid and therefore have 0 neighbours… as this causes the loop to fail. We are inputting NAs for the average familiarity for these individuals	#
+	if(length(neighbours$squirrel_id > 0)){#
+		#this creates new columns in your 'neighbours' dataframe so that you can identify which axy individual you just created a neighbourhood for and adds back some of the information about the axy individual#
+		neighbours$axy.ID <- axy_fam$squirrel_id[j]#
+		neighbours$axy.locX <- axy_fam$locX[j]#
+		neighbours$axy.locY <- axy_fam$locY[j]#
+		neighbours$axy.reflo <- axy_fam$reflo[j]#
+		neighbours$axy.Date <- axy_fam$date[j]#
+		#make sure neighbours aren't duplicated (i.e. because an individual has more than one primary midden) - this shouldn't happen because of how we subsetted the census data above #
+		neighbours %<>% filter(!duplicated(squirrel_id))#
+		#Calculate Distance			#
+		n <- length(neighbours$axy.ID)#
+		for(k in 1:n){#
+			dis <- sqrt((30*(neighbours$axy.locX[k])-30*(neighbours$locX[k]))^2+(30*(neighbours$axy.locY[k])-30*(neighbours$locY[k]))^2)#
+			neighbours[k,"Nbor.dis"] <- dis#
+		}	#
+		#this serves as a double check and helps catch any mistakes in the database where two squirrels were assigned the same primary midden				#
+		neighbours %<>% filter(Nbor.dis > 0)#
+		#Calculate Familiarity - here we are going to cycle through each neighbour and see how long the axy squirrel and neighbouring squirrel have occupied their current territories next to each other#
+		n <- length(neighbours$axy.ID)#
+		for(i in 1:n){#
+			#this selects only census information that is on or before the date that you want to calculate familiarity from	#
+			fam1 <- subset(census, census$date<=neighbours$axy.Date[i])#
+			#select all instances where the axy squirrel lived at this reflo#
+			fam2 <- subset(fam1, fam1$squirrel_id==neighbours$axy.ID[i] & fam1$reflo==neighbours$axy.reflo[i])#
+			#because we have juveniles for whom we are using mom's midden as their "home" there will be instances where the axy squirrel is not found in the census before the date of interest. This will cause a -Inf in the data. These should be zeros in the data#
+			if(nrow(fam2)==0){#
+				own <- neighbours$axy.Date[i]#
+			} else {#
+				#select the earliest date that that the axy squirrel lived at this reflo#
+				own <- min(fam2$date)#
+			}#
+			#select all instances where the neighbouring squirrel lived at this reflo#
+			fam3 <- subset(fam1, fam1$squirrel_id==neighbours$squirrel_id[i] & fam1$reflo==neighbours$reflo[i])#
+			#if the neighbour was censused after the axy squirrel sometimes the neighbour was only present at the current midden after the date of interest. In this case the neighbour will not show up in the fam3 dataframe and there will be no minimum date at which the neighbour first occupied their neighbouring midden, leading to a -Inf in the data. This code solves that issue#
+			if(nrow(fam3) == 0){#
+				nbor <- neighbours$axy.Date[i]#
+			} else{#
+				#selet the earliest date that the neighbouring squirrel lived at this reflo#
+				nbor <- min(fam3$date)#
+			}#
+			#take the latest date of these two (this is the earliest date that these individuals lived next to each other  -- it does not take into account the possibility that the neighbouring squirrel moved from another nearby midden, but anecdotal evidence from the field suggests that anytime a neighbour moves to another nearby midden the surrounding squirrels treat that individual as a "new" neighbour)#
+			f <- max(own,nbor)#
+			#subtract this date from the current date to get the length of time these individuals have lived next to each other#
+			f <- neighbours$axy.Date[i]-f#
+			neighbours[i,"Nbor.familiarity"] <- f#
+		}#
+		#NOTE: Because neighbours are occassionally censused in the same month but a few days after the 'owner' this code occassionally creates negative familiarity values. For example if the owner census date is May 15, 2001 and the neighbour census date is May 17, 2001, and the first date that both squirrels are observed on neighbouring middens is May 17, 2001 this will lead to a negative familarity value of -2 (May 15, 2001 - May 17, 2001). To avoid these negative familiarity values you can change all negative values to zeros using the code below. This is a rough approximation but appropriate given that our measure of familiarity is also an approximation (i.e. familiarity is only updated twice per year).#
+		#neighbours %<>% #
+		#	mutate(Nbor.ten = ifelse(Nbor.ten < 0, 0, Nbor.ten))#
+		#As discussed above- turn NA's into 0's since these instances represent cases where the neighboring individual was censused AFTER the axy and had no other entries in the census prior... meaning this neighbour and the axy individual's familiarity was 0 at the time#
+		neighbours %<>%#
+			mutate(Nbor.familiarity = ifelse(is.na(Nbor.familiarity), 0, Nbor.familiarity))#
+		#Calculate averages for the neighbourhood	#
+		Avg.familiarity = mean(neighbours$Nbor.familiarity, na.rm=T)#
+		#Put it all together #
+		axy_fam[j,"axy_avg_fam"] <- Avg.familiarity #
+	} else{#
+		axy_fam[j,"axy_avg_fam"] <- NA#
+	}#
 }#
 #
-#clean dataset with local density for axys#
-clean_axy_d<-axy_local_density%>%select(c(squirrel_id, axy_yr, axy.local.density))#
-summary(clean_axy_d)
+clean_axy_h<-axy_fam %>% select(c(axy_yr, squirrel_id, axy_avg_fam)) %>% mutate(axy_avg_fam=ifelse(is.na(axy_avg_fam), 0, axy_avg_fam))#
+#
+clean_axy<-left_join(clean_axy_d, clean_axy_h,  by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))
+adult_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%#
+	filter(ageclass=="A") %>% #
+	mutate(trialnumber=as.numeric(trialnumber),#
+		year=year-2005) %>%#
+	ungroup() %>%	#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
+	mutate(b.assay.local.density= mean(assay.local.density),		#
+		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+	ungroup()
+(adult_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #367 individuals
+m1b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data=adult_assay_all)
+plot(m1b)
+hist(resid(m1b))
+summary(m1b)
+#for OFT PC1 (i.e. OFT1)#
+sm1<-arm::sim(m1b,1000)#
+smfixef=sm1@fixef#
+smranef=sm1@ranef#
+smfixef=coda::as.mcmc(smfixef)#
+MCMCglmm::posterior.mode(smfixef)#
+coda::HPDinterval(smfixef)#
+#
+##among-individual variance#
+bID<-sm1@ranef$squirrel_id#
+bvar<-as.vector(apply(bID, 1, var)) ##between individual variance posterior distribution#
+bvar<-coda::as.mcmc(bvar)#
+MCMCglmm::posterior.mode(bvar) ## mode of the distribution#
+coda::HPDinterval(bvar)#
+#
+##residual variance#
+rvar<-sm1@sigma^2#
+rvar<-coda::as.mcmc(rvar)#
+MCMCglmm::posterior.mode(rvar)#
+coda::HPDinterval(rvar)#
+#
+##repeatability#
+rID<-bvar/(bvar+rvar)#
+MCMCglmm::posterior.mode(rID)#
+coda::HPDinterval(rID)
+m2a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= adult_assay_all)
+m2b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data=adult_assay_all)
+juv_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%#
+	filter(ageclass=="J") %>% #
+	mutate(trialnumber=as.numeric(trialnumber),#
+		year=year-2005)%>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
+	mutate(b.assay.local.density= mean(assay.local.density)) %>%#
+	ungroup()
+(juv_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id)%>%nrow() #321 individuals
+summary(juv_assay_all$trialnumber)
+nrow(juv_assay_all) #441
+m5a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data= juv_assay_all)
+sm1<-arm::sim(m5a,1000)#
+smfixef=sm1@fixef#
+smranef=sm1@ranef#
+smfixef=coda::as.mcmc(smfixef)#
+MCMCglmm::posterior.mode(smfixef)#
+coda::HPDinterval(smfixef) #potential issue w/trialnumber, grid SU, sexM#
+#
+##among-individual variance#
+bID<-sm1@ranef$squirrel_id#
+bvar<-as.vector(apply(bID, 1, var)) ##between individual variance posterior distribution#
+bvar<-coda::as.mcmc(bvar)#
+MCMCglmm::posterior.mode(bvar) ## mode of the distribution#
+coda::HPDinterval(bvar)#
+#
+##residual variance#
+rvar<-sm1@sigma^2#
+rvar<-coda::as.mcmc(rvar)#
+MCMCglmm::posterior.mode(rvar)#
+coda::HPDinterval(rvar)#
+#
+##repeatability#
+rID<-bvar/(bvar+rvar)#
+MCMCglmm::posterior.mode(rID)#
+coda::HPDinterval(rID)
+m5b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + (1|squirrel_id) + (1| year), data= juv_assay_all)
+m6a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= juv_assay_all)
+m6b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + (1|squirrel_id) + (1| year), data= juv_assay_all)
+yearling_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%#
+	filter(ageclass=="Y") %>% #
+	mutate(trialnumber=as.numeric(trialnumber),#
+		year=year-2005)%>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
+	mutate(b.assay.local.density= mean(assay.local.density),		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+	ungroup()
+(yearling_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #202 individuals
+summary(yearling_assay_all$trialnumber)
+nrow(yearling_assay_all) #251
+m3a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m3b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m4b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+#create working dataframe#
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  filter(axy_ageclass=="A") %>% #
+  mutate(axy_yr=axy_yr-2014)%>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
+	ungroup()
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #202 adults
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_month) %>% nrow() #~461 sessions
+nrow(adult_axy_all) #21271
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=adult_axy_all)
+m1b<-lmer(PC1 ~ grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=adult_axy_all)
+head(clean_axy)
+head(birth)
+head(assay)
+head(assays)
+adult_axy_all<-left_join(axy1, clean_axy, (assays%>%select(squirrel_id, grid)), by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%
+()
+adult_axy_all<-left_join(axy1, clean_axy, (assays%>%select(squirrel_id, grid)), by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))
+summary(adult_axy_all)
+head(adult_axy_all)
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((assays%>%select(squirrel_id, grid)), by=c("squirrel_id"="squirrel_id"))
+head(assays)
+assays%>%select(squirrel_id, grid)
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((assays%>%select(squirrel_id, grid)), by="squirrel_id")
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((assays%>%group_by(squirrel_id)%>%filter(row_number()==1)%>%select(squirrel_id, grid)), by="squirrel_id")
+head(adult_axy_all)
+flalls = tbl(con, "flastall2")
+head(flalls)
+flalls = tbl(con, "flastall2") %>% select(squirrel_id, grid=gr)
+head(flalls)
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr)), by="squirrel_id")
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join(flalls, by="squirrel_id")
+flalls = tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join(flalls, by="squirrel_id")
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id")
+head(adult_axy_all)
+#create working dataframe#
+adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id") %>%#
+  filter(axy_ageclass=="A") %>% #
+  mutate(axy_yr=axy_yr-2014)%>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
+	ungroup()
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #255 adults
+m1b<-lmer(PC1 ~ grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=adult_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=adult_axy_all)
+m2b<-lmer(PC2 ~ grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=adult_axy_all)
+#create working dataframe#
+yearling_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id") %>% #to bring in the grid information#
+  filter(axy_ageclass=="Y") %>% #
+  mutate(axy_yr=axy_yr-2014)%>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
+	ungroup()
+(yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #68 individuals
+(yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_month) %>% nrow() #~95 sessions
+nrow(yearling_axy_all) #3924
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m1b<-lmer(PC1 ~ grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m2b<-lmer(PC2 ~  grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+juvenile_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%#
+  left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id") %>% #to bring in the grid information#
+  filter(axy_ageclass=="J")
+(juvenile_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #116 individuals
+(juvenile_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_month) %>% nrow() #~209 sessions
+nrow(juvenile_axy_all) #9004

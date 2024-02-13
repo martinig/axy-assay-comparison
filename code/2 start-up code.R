@@ -29,7 +29,9 @@ pacman::p_load(ggplot2,
                broom.mixed,
                ggforce, 
                gridGraphics,
-               ggeffects
+               ggeffects,
+               magrittr,
+               krsp
 )
 
 
