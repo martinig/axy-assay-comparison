@@ -1,5 +1,5 @@
 #Andrea's Comment
-#Last edited Feb 11, 2024 by J. I. Sanders
+#Last edited Feb 19, 2024 by J. I. Sanders
 
 # Load packages
 library(purrr)
@@ -78,12 +78,43 @@ consecutive_minute <- keep_30 %>%
   map(~ consecutive_minute(.x))
 
 # Convert the list of data.frames to a single data.frame
-result2 <- bind_rows(consecutive_minute)
+result2a <- bind_rows(consecutive_minute)
 
 # Print the result
-result2
+result2a
 
-result2 %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
+result2a %>% filter(squirrel_id== 12678)  %>% arrange(timestamp)
+
+#STEP TWO B:
+#How to have it sample a set amount of time during a specific time of day (e.g., 7 minutes starting at dawn)
+ 
+# Function to randomly select one minute of data from one tod variable
+ 
+#Select which tod you want to sample
+sample_period = "night"
+
+window_minute <- function(x) {
+  x_window <- x %>% filter(tod == sample_period)
+  n <- nrow(x_window)
+  if (n < 2) return(NULL)
+  
+  start_index <- sample(1:(n-1), 1)
+  selected_indices <- start_index:(start_index + 1)
+  return(x_window[selected_indices, , drop = FALSE])
+}
+
+# Apply the function to each squirrel
+window_minute <- keep_30 %>%
+  group_split(squirrel_id) %>%
+  map(~ window_minute(.x))
+
+# Convert the list of data.frames to a single data.frame
+result2b <- bind_rows(window_minute)
+
+# Print the result
+result2b
+
+result2b %>% filter(squirrel_id== 12678) %>% arrange(timestamp)
 
 #STEP THREE:
 #have it sample a random set amount of time (e.g., 7 minutes randomly spread out across the whole day) - here it could be 1 minute of the "whole (2 minute)" day = noncontinous/nonconsecutive time
