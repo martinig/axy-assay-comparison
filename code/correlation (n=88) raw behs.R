@@ -1,5 +1,5 @@
 #robust correlation and pearson's correlation between raw behaviours for focal and assay data
-#last updated October 25, 2021 by A. R. Martinig
+#last updated Frebruary 27, 2024 by J. I. Sanders
 
 # run start up code, focal data subsets 
 Start-up code.R
@@ -13,17 +13,18 @@ library(glmmTMB)
 #standardize variables to test for differences between methods (Pearson and robust)
 
 #generate combined dataset
-combine<-dplyr::inner_join(personality_88, focals1, by=("squirrel_id"="squirrel_id")) %>% #extract only the PCA scores for the n=88 subset
-		ungroup() %>% 
-		mutate(grid=grid.x, sex=sex.x) %>% 
-		select(-c(sex.x, grid.x, grid.y, sex.y))
+combine<-dplyr::inner_join(assays, axy, by=("squirrel_id"="squirrel_id")) %>% #extract only the PCA scores for the n=88 subset
+		ungroup() 
+
+#There may be repeated values in some squirrels due to discrepancies in the number of values for assays and axys. If there are more assay values, the axy values will be repeated and vice versa. Right now, we are keeping repeated values.
 
 summary(combine)
 head(combine)
 nrow(combine)
+combine %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
 
 #Pearson's correlation
-attach(combine);tt=cbind(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency, prop_feeding, prop_vocal_rattle, prop_vocal_squeak, prop_vocal_bark, prop_travel, prop_sit, prop_in_nest, prop_caching, prop_groom, prop_forage, prop_vigilant)
+attach(combine);tt=cbind(walk, jump, hole, hang, chew, groom, still, feed, forage, nestmove, nestnotmove, notmoving, travel)
 Hmisc::rcorr(tt, type="pearson")
 
 #correlations are the same even if I standardize the variables
@@ -34,8 +35,8 @@ Hmisc::rcorr(tt, type="pearson")
 
 p1<-ggstatsplot::ggcorrmat(
   assays,
-  cor.vars = c(walk, jump, hole, hang, chew, groom, still, front, back, attack, attacklatency, approachlatency),
-  cor.vars.names = c("Walk", "Jump", "Hole", "Hang", "Chew/Scratch", "Self-grooming", "Still", "Front of arena", "Back of arena", "Attack rate", "Attack latency", "Approach latency"),
+  cor.vars = c(walk, jump, hole, hang, chew, groom, still),
+  cor.vars.names = c("Walk", "Jump", "Hole", "Hang", "Chew/Scratch", "Self-grooming", "Still"),
   output = "plot",
   matrix.type = "lower",
   type = "pearson",
@@ -66,9 +67,9 @@ p1<-ggstatsplot::ggcorrmat(
         
 
 p2<-ggstatsplot::ggcorrmat(
-  focals1,
-  cor.vars = c(prop_feeding, prop_vocal_rattle, prop_vocal_squeak, prop_vocal_bark, prop_travel, prop_sit, prop_in_nest, prop_caching, prop_groom, prop_forage, prop_vigilant),
-  cor.vars.names = c("Feed", "Rattle", "Squeak", "Bark", "Travel", "Rest", "In nest", "Caching", "Self-grooming", "Forage", "Vigilant"),
+  axy,
+  cor.vars = c(feed, forage, nestmove, nestnotmove, notmoving, travel),
+  cor.vars.names = c("Feed", "Forage", "Nest Moving", "Nest Not Moving", "Not Moving", "Travel"),
   output = "plot",
   matrix.type = "lower",
   type = "pearson",
