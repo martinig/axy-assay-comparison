@@ -1,7 +1,7 @@
 #this is the first R script that always needs to be run
 #all the data cleaning is here 
 #if a mistake is found message April before making changes
-#Last edited on Feb 13, 2024 by A. R. Martinig 
+#Last edited on Feb 27, 2024 by A. R. Martinig 
 
 #axy-assay analysis for Jonas
 
@@ -166,16 +166,18 @@ head(birth)
   
 axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%
 	mutate(
-	axy_id=paste(id, date, tod, sep = "-"), 
-	axy_date=ymd(date),
-	axy_yr=year(date),
-	axy_month=month(date)) %>%
+		axy_id=paste(id, date, tod, sep = "-"), 
+		axy_date=ymd(date),
+		axy_yr=year(date),
+		axy_month=month(date)) %>%
+	filter(!is.na(id)) %>% #remove the rows with NA for squirrel_id
 	select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)
 
 head(axy)
+summary(axy)
 
-(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals
-nrow(axy) #37668
+(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #335 individuals
+nrow(axy) #37554
 
 
 

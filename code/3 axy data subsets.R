@@ -1,5 +1,5 @@
 #axy data for the complete dataset
-#last edited Feb 13, 2024 by A. R. Martinig
+#last edited Feb 27, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -49,8 +49,8 @@ table(axy1$sex)
 ######  extracting summary stats  ######
 ########################################
 
-(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals
-nrow(axy1) #37668
+(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #335 individuals
+nrow(axy1) #37554
 
 #deployment dates needed to calculate the exact number of sessions
 (axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 852 sessions 

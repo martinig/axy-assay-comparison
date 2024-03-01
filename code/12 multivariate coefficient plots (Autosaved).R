@@ -224,7 +224,7 @@ plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age", "t
 
 plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
 
-E<-ggplot(plot.dat2, 
+E<-ggplot(plot.dat2,  
 	aes(x = latent.mean, y = subject2)) + 
 	geom_vline(xintercept = 0, linetype="solid", 
                 color = "gray", size=0.75) +	
