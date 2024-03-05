@@ -1,4 +1,4 @@
-Behaviour,Repeatability,LCI,UCI,age,subset,type,n
+Behaviour,Repeatability,LCI,UCI,age,subset,rep_type,n
 PC1,0.37,0.34,0.41,A,all,non_adjusted,259
 PC1,0.4980908,0.4772937,0.5235391,A,random,non_adjusted,177
 PC1,0.1122656,0.09913583,0.1312055,A,consecutive,non_adjusted,177
