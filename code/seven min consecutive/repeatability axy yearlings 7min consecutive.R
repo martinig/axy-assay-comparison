@@ -3,7 +3,7 @@
 #repeatabilities for axy1 file, yearlings only
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
-#last edited Feb 13, 2024 by A. R. Martinig
+#last edited Mar 5, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
