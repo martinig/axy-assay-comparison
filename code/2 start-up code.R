@@ -1,7 +1,7 @@
 #this is the first R script that always needs to be run
 #all the data cleaning is here 
 #if a mistake is found message April before making changes
-#Last edited on Feb 27, 2024 by A. R. Martinig 
+#Last edited on March 5, 2024 by A. R. Martinig 
 
 #axy-assay analysis for Jonas
 
@@ -51,12 +51,7 @@ filter<-dplyr::filter
 
 #creating the assay datast we will be using here
 
-assays<-read.csv("Trials.csv", header=T) %>%
-	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still", "front", "back", "attack", "attacklatency", "approachlatency"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below
-	group_by(sq_id, trialdate) %>%
-	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)
-	filter(row_number()==1) %>%
-	ungroup() %>%
+assays<-read.csv("raw assays.csv", header=T) %>%
 	group_by(sq_id) %>%
 	mutate(trialdate=ymd(trialdate)) %>%
 	arrange(trialdate) %>%
@@ -114,7 +109,7 @@ other_stats<-assays%>%
 	group_by(squirrel_id)%>%
 	filter(row_number()==1)
 
-(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #810 individuals
+(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 table(other_stats$sex) #sex number
 
 #ageclass stats
@@ -176,8 +171,8 @@ axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%
 head(axy)
 summary(axy)
 
-(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #335 individuals
-nrow(axy) #37554
+(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals
+nrow(axy) #38284
 
 
 

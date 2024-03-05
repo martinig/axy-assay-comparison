@@ -6,10 +6,94 @@ rm(list=ls(all=T))#
 #
 ##set wd to the folder with all your csv's in it#
 setwd("~/Documents/Files/Post-docs/UofC/Jonas (ECOL 530)/axy-assay-comparison/data")
+options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
+#
+#load libraries#
+pacman::p_load(ggplot2, #
+               dplyr, #
+               lubridate, #
+               tidyverse,   #
+               broom,  #
+               FSA,      #
+               glmmTMB,  #
+               lme4,   #
+               tidyr,      #
+               DescTools,#
+               scales,#
+               ggpubr,#
+               grid,#
+               lattice,#
+               sjPlot,#
+               sjlabelled,#
+               sjmisc,#
+               cowplot, #
+               broom.mixed,#
+               ggforce, #
+               gridGraphics,#
+               ggeffects,#
+               magrittr,#
+               krsp#
+)#
+select<-dplyr::select#
+filter<-dplyr::filter#
+###############################
+#  importing  data and formatting it  ##
+###############################
+#########################################
+#raw behavioural assays#
+#impossible values removed#
+#########################################
+#
+#creating the assay datast we will be using here#
+#
+assays<-read.csv("raw assays.csv", header=T) %>%#
+	group_by(sq_id) %>%#
+	mutate(trialdate=ymd(trialdate)) %>%#
+	arrange(trialdate) %>%#
+	mutate(trialnumber=row_number())%>%#
+	ungroup() %>%#
+#converting the raw scores#
+	mutate(#
+	ageclass=ifelse(age==0, "J", #
+			ifelse(age==1, "Y", #
+			ifelse(age>1, "A",  ageclass))),#
+		squirrel_id=sq_id,#
+		age=as.numeric(age),#
+		walk=(walk/450), #
+		jump=(jump/450), #
+		hole=(hole/450), #
+		hang=(hang/450), #
+		chew=(chew/450), #
+		groom=(groom/450), #
+		still=(still/450),#
+		front=(front/300), #
+		back=(back/300), #
+		attack=(attack/300), #
+		attacklatency=(attacklatency/300), #
+		approachlatency=(approachlatency/300)) %>%#
+	filter(!squirrel_id== 23686, #IT DOES NOT HAVE A SEX LISTED ANYWHERE!#
+	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) | front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% #
+	#attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds #
+	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks#
+	#this leaves squirrels with <=252 attacks (which also should be investigated)#
+	select(-c(sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, colours, midden, taglft, tagrt, front, back, attack, attacklatency, approachlatency)) %>%#
+	droplevels()#
+summary(assays)#
+head(assays)#
+#
+(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals#
+nrow(assays) #1184
+#total number of inds and sex stats#
+other_stats<-assays%>%#
+	group_by(squirrel_id)%>%#
+	filter(row_number()==1)#
+#
+(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #810 individuals#
+table(other_stats$sex) #sex number
 #this is the first R script that always needs to be run#
 #all the data cleaning is here #
 #if a mistake is found message April before making changes#
-#Last edited on Feb 13, 2024 by A. R. Martinig #
+#Last edited on Mar 5, 2024 by A. R. Martinig #
 #
 #axy-assay analysis for Jonas#
 #
@@ -53,12 +137,7 @@ filter<-dplyr::filter#
 #
 #creating the assay datast we will be using here#
 #
-assays<-read.csv("Trials.csv", header=T) %>%#
-	bind_rows(read.csv("Personality KRSP Master File (Feb 13, 2024).csv", header=T)%>%select(-c(X)) %>%mutate(across(c("walk", "jump", "hole", "hang", "chew", "groom", "still", "front", "back", "attack", "attacklatency", "approachlatency"), as.numeric), na.rm=TRUE)) %>% #Ben's master dataset has a lot of problems, so I have to fix them below#
-	group_by(sq_id, trialdate) %>%#
-	#filter out duplicates (not just across datasets, for example sq_id 19729 has multiple records on the same day in Ben's data)#
-	filter(row_number()==1) %>%#
-	ungroup() %>%#
+assays<-read.csv("raw assays.csv", header=T) %>%#
 	group_by(sq_id) %>%#
 	mutate(trialdate=ymd(trialdate)) %>%#
 	arrange(trialdate) %>%#
@@ -109,7 +188,7 @@ other_stats<-assays%>%#
 	group_by(squirrel_id)%>%#
 	filter(row_number()==1)#
 #
-(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #810 individuals#
+(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals#
 table(other_stats$sex) #sex number#
 #
 #ageclass stats#
@@ -162,14 +241,14 @@ axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%#
 		axy_date=ymd(date),#
 		axy_yr=year(date),#
 		axy_month=month(date)) %>%#
-	filter(!is.na(squirrel_id)) %>% #
+	filter(!is.na(id)) %>% #remove the rows with NA for squirrel_id#
 	select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)#
 #
 head(axy)#
 summary(axy)#
 #
-(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #336 individuals#
-nrow(axy) #37668#
+(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals#
+nrow(axy) #38284#
 #conserved theme across plots#
 squirrel_theme <- theme_bw() +#
     theme(#legend.position = "top",#
@@ -184,3 +263,245 @@ squirrel_theme <- theme_bw() +#
       axis.text.y = element_text(size = 11, colour = "black"), #
       legend.title = element_text(size = 11, colour = "black"), #
       legend.text = element_text(size = 10, colour = "black"))
+#axy data for the complete dataset#
+#last edited March 4, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+#
+#########################################
+#complete axy dataset, n=340 inds#
+#before merging with personality data#
+#########################################
+#
+axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%#
+	group_by(axy_id, squirrel_id) %>%#
+  	mutate(#
+  		axy_age = axy_yr-byear, #calc age#
+  		axy_ageclass = ifelse(axy_age==1, "Y", #
+  			ifelse(axy_age >1, "A",#
+        	ifelse(axy_age < 1, "J", "")))) %>% #creating age class  #
+     ungroup() %>%   	      	#
+##group by squirrel id and axy id (treats each axy as behavior trial) #
+	group_by(squirrel_id, axy_id) %>%#
+    mutate(total_obs=sum(total), #
+         #get the totals for each behaviour#
+         total_feeding=sum(feed),#
+         total_foraging=sum(forage),#
+         total_nestmoving=sum(nestmove),#
+         total_nestnotmoving=sum(nestnotmove),#
+         total_notmoving =sum(notmoving),#
+         total_travel=sum(travel),#
+         #calc the proportions#
+         prop_feeding=(total_feeding/total_obs),#
+         prop_foraging=(total_foraging/total_obs),#
+         prop_nestmoving =(total_nestmoving/total_obs),#
+         prop_nestnotmoving =(total_nestnotmoving/total_obs),#
+         prop_notmoving =(total_notmoving/total_obs),#
+         prop_travel=(total_travel/total_obs)) %>%#
+	filter(row_number()==1) %>%  #selects first row!#
+  ungroup() %>%#
+  droplevels() %>%#
+  select(-c(total, total_obs, total_feeding, total_foraging, total_nestmoving, total_nestnotmoving, total_notmoving, total_travel))#
+#
+summary(axy1) #
+head(axy1)#
+#
+table(axy1$sex)#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals#
+nrow(axy1) #38284#
+#
+#deployment dates needed to calculate the exact number of sessions#
+(axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 852 sessions #
+#
+#year range#
+table(axy1$axy_yr)#
+#
+#sex stats#
+stats3<-axy1%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats3$sex)#
+#
+#ageclass stats#
+stats4<-axy1%>%group_by(squirrel_id, axy_ageclass)%>%filter(row_number()==1)#
+table(stats4$axy_ageclass)#
+table(stats4$axy_ageclass, stats4$sex) #
+#
+#ageclass stats#
+stats5<-axy1%>%group_by(squirrel_id, axy_ageclass)#
+table(stats5$axy_ageclass) #
+#
+#observers#
+#obs<-axy1%>%group_by(axy_id)%>%filter(row_number()==1) %>% group_by(f_observer) %>% mutate(sum=n())#
+#table(obs$f_observer)#
+#summary(obs$sum)#
+#
+#trial number by age class stats#
+ads<-axy1 %>% filter(axy_ageclass =="A") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+yrs<-axy1 %>% filter(axy_ageclass =="Y") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+juvs<-axy1 %>% filter(axy_ageclass =="J") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)#
+#
+#note: trial number is not reliable for adults or yearlings BECAUSE the count starts with the first trial - which may be during earlier phases (like an adult with 5 trials, could have had 3 of them done as a juvenile) - to get around this, I calculated sums after subsetting#
+#
+nrow(ads)#
+table(ads$sum, ads$sex)#
+#
+nrow(yrs)#
+table(yrs$sum, yrs$sex)#
+#
+nrow(juvs)#
+table(juvs$sum, juvs$sex)#
+#########################################
+# merged axy and personality dataset#
+# n=67#
+#########################################
+#
+axy2<- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
+  group_by(axy_id)%>%#
+  filter(row_number()==1) %>%#
+  droplevels()%>%#
+  select(-c(videodate, trialtime)) %>%#
+  ungroup()#
+#
+head(axy2)#
+#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy2) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals#
+nrow(axy2) #8678#
+#
+table(axy2$axy_yr)#
+#
+stats5<-axy2%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats5$sex)#
+#
+#assay ageclass#
+stats6a<-axy2%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats6a$ageclass)#
+#
+#axy ageclass#
+stats6b<-axy2%>%group_by(squirrel_id, axy_ageclass)%>%filter(row_number()==1)#
+table(stats6b$axy_ageclass)#
+#########################################
+# merged axy and personality dataset#
+# filtered for matching ageclass, n=52#
+#########################################
+#
+#run filtered by ageclass#
+axy_ageclass <- dplyr::inner_join(assays, axy1, by=c("ageclass"="axy_ageclass", "squirrel_id"="squirrel_id", "sex"="sex")) %>%#
+  droplevels()%>%#
+  group_by(axy_id)%>%#
+  filter(row_number()==1) %>%#
+  select(-c(videodate, trialtime)) %>%#
+  ungroup()#
+#
+head(axy_ageclass)#
+#
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy_ageclass) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #52 individuals#
+nrow(axy_ageclass) #6722#
+#
+table(axy_ageclass $axy_yr)#
+#
+stats7<-axy_ageclass%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats7$sex)#
+#
+stats8<-axy_ageclass%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats8$ageclass) #assay ageclass = axy ageclass#
+#########################################
+# merged axy and personality dataset#
+# filtered for matching AGE, n=17#
+#########################################
+#
+#Run filtered by age #
+axy_age <- dplyr::inner_join(assays, axy1, by=c("ageclass"="axy_ageclass", "age"="axy_age", "squirrel_id"="squirrel_id", "sex"="sex")) %>%#
+  droplevels()%>%#
+  group_by(axy_id)%>%#
+  filter(row_number()==1) %>%#
+  select(-c(videodate, trialtime)) %>%#
+  ungroup()#
+head(axy_age)  #
+#########################################
+######  extracting summary stats  #######
+#########################################
+#
+(axy_age) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #17 individuals#
+nrow(axy_age) #1860#
+#
+table(axy_age $axy_yr)#
+#
+stats9<-axy_age%>%group_by(squirrel_id)%>%filter(row_number()==1)#
+table(stats9$sex)#
+#
+stats10<-axy_age%>%group_by(squirrel_id, ageclass)%>%filter(row_number()==1)#
+table(stats10$ageclass) #assay ageclass = axy ageclass
+OFT<-assays%>%filter(!is.na(walk))#
+#
+names(OFT)#
+summary(OFT)#
+(OFT) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #809 individuals#
+nrow(OFT)#
+#
+### script for running PCA on select columns from data set#
+###need to check that you use the right set of behaviours, and that they are formatted as was done previously#
+##e.g., proportion of time, counts, yes/no, etc.#
+OFT_j<-prcomp(OFT[c("walk", "jump", "hole", "hang", "chew", "groom", "still")], center=TRUE, scale =TRUE)#
+summary(OFT_j)#
+OFT_j#
+#
+#using correlation matrix doesn't change anything :)#
+#OFT_j<-princomp(OFT[c("walk", "jump", "hole", "hang", "chew", "groom", "still")], cor =TRUE)#
+#summary(OFT_j)#
+#OFT_j#
+#print(loadings(OFT_j), cutoff=0)#
+###script for adding PC1 and PC2 column of OFT to data table#
+OFT$OFT1<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data=OFT, center=TRUE, scale =TRUE)$x[,1]#
+OFT$OFT2<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data=OFT, center=TRUE, scale =TRUE)$x[,2]#
+#
+OFT_only<-OFT%>%select(squirrel_id, OFT1, OFT2, trialnumber)			#
+#
+personality_all<-assays%>%#
+	group_by(squirrel_id, trialnumber)%>%#
+	filter(row_number()==1) %>%#
+	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
+	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)#
+#
+summary(personality_all)#
+head(personality_all)#
+#
+personality_all%>%filter(is.na(age))#
+personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #882 individuals#
+personality_all %>% as_tibble() %>% count(sex) %>% nrow() #2 sexes#
+nrow(personality_all) #1184
+personality_67<-assays%>%#
+	left_join(OFT_only, by=c("squirrel_id", "trialnumber")) %>% #
+	inner_join(axy1, by=c("squirrel_id"="squirrel_id",  "sex"="sex")) %>%#
+	group_by(squirrel_id, trialnumber)%>%#
+	filter(row_number()==1) %>%#
+	ungroup() %>%#
+	select(squirrel_id, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)#
+summary(personality_67)	#
+head(personality_67)	#
+personality_67 %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
+colnames(axy1)#
+#
+PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)#
+summary(PCaxys1) #
+PCaxys1#
+##PC1: feeding, foraging, -nestnotmoving, travel#
+##PC2: nestnotmoving, -notmoving#
+##PC3: nestmoveing, notmoving#
+#
+#add PCs to dataset#
+axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]#
+axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2]

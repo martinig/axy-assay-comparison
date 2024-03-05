@@ -35,7 +35,7 @@ A<-ggplot(plot.dat,
 		y = subject2, 
 		yend = subject), size=1) +
 	geom_point(shape=16,cex=4, color="black") + 
-	scale_x_continuous(breaks = scales::pretty_breaks(6)) +
+	scale_x_continuous(breaks = scales::pretty_breaks(4)) +
 	scale_y_discrete(breaks = c("OFT1:OFT2", "OFT1:PC1", "OFT1:PC2", "OFT2:PC1", "OFT2:PC2"),
 			labels = c("Assay BA1 \n& Assay BA2", "Assay BA1 \n& Axy BA1", "Assay BA1 \n& Axy BA2", "Assay BA2 \n& Axy BA1", "Assay BA2 \n& Axy BA2"),
 			expand=c(0,0.5,0,0.5)) + #if you want to change the spacing between ticks
@@ -224,7 +224,7 @@ plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age", "t
 
 plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
 
-E<-ggplot(plot.dat2, 
+E<-ggplot(plot.dat2,  
 	aes(x = latent.mean, y = subject2)) + 
 	geom_vline(xintercept = 0, linetype="solid", 
                 color = "gray", size=0.75) +	

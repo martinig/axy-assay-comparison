@@ -53,7 +53,7 @@ head(merged)
 (merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1090 individuals
 
 
-
+ 
 final_MCMC<-merged%>% 
   	mutate(date=yday(trialdate), #converts dates to days since Jan 1st!
          age2=age^2,

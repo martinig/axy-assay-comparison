@@ -48,7 +48,7 @@ head(personality_all)
 
 personality_all%>%filter(is.na(age))
 	
-personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #882 individuals
+personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 personality_all %>% as_tibble() %>% count(sex) %>% nrow() #2 sexes
 nrow(personality_all) #1184
 

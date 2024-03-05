@@ -1,11 +1,11 @@
 #axy data for the complete dataset
-#last edited Feb 27, 2024 by A. R. Martinig
+#last edited March 4, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
 
 ########################################
-#complete axy dataset, n=336 inds
+#complete axy dataset, n=340 inds
 #before merging with personality data
 ########################################
 
@@ -49,8 +49,8 @@ table(axy1$sex)
 ######  extracting summary stats  ######
 ########################################
 
-(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #335 individuals
-nrow(axy1) #37554
+(axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals
+nrow(axy1) #38284
 
 #deployment dates needed to calculate the exact number of sessions
 (axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 852 sessions 
