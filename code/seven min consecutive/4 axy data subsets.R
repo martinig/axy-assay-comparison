@@ -1,4 +1,4 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
 #axy data for the complete dataset
 #last edited March 5, 2024 by A. R. Martinig

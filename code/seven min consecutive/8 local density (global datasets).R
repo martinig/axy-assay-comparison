@@ -1,4 +1,4 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
 #code to calculate local density
 #original code by E. R. Siracusa

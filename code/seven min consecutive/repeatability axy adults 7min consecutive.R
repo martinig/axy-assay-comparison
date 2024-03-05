@@ -1,9 +1,9 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
 #repeatabilities for axy1 file, adults only
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (e.g., A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
-#last edited Mar 5, 2024 by A. R. Martinig
+#last edited March 5, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R

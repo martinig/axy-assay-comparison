@@ -1,4 +1,4 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
 #working directory here
 #Last edited on Jan 4, 2024 by A. R. Martinig 

@@ -1,8 +1,6 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
-#this is the first R script that always needs to be run
-#all the data cleaning is here 
-#if a mistake is found message April before making changes
+#working directory here
 #Last edited on Dec 12, 2023 by A. R. Martinig 
 
 #axy-assay analysis for Jonas

@@ -1,0 +1,15 @@
+Behaviour,Repeatability,LCI,UCI,Status,Age,stage,
+Activity,0.2905114,0.2324651,0.333873,all,E,A,e-w 102
+Activity,0.3076694,0.2261756,0.3668428,survivors,E2,A,e-w 62
+Activity,0.5892758,0.4926398,0.6643618,all,Y,B,w-e 62
+Activity,0.5452929,0.3843546,0.7063803,survivors,Y2,B,w-e 17
+Activity,0.69031219,0.54795738,0.80763887,survivors,YK,B,Kelley
+Activity,0.51,0.4,0.63,all,A,C,Taylor
+Activity,0.41,NA,NA,all,A2,C,Boon
+Aggression,0.3030329,0.2353574,0.3422191,all,E,A,e-w 102
+Aggression,0.2814297,0.2258607,0.3575771,survivors,E2,A,e-w 62
+Aggression,0.1031701,0.07292194,0.1333891,all,Y,B,w-e 62
+Aggression,0.09703509,0.04758308,0.1683255,survivors,Y2,B,w-e 17
+Aggression,0.30007624,0.1616116,0.43951385,survivors,YK,B,Kelley
+Aggression,0.44,0.33,0.56,all,A,C,Taylor
+Aggression,0.374,NA,NA,all,A2,C,Boon

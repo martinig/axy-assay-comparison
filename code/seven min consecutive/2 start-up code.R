@@ -1,4 +1,4 @@
-#random seven minute sampling
+#consecutive seven minute sampling
 
 #this is the first R script that always needs to be run
 #all the data cleaning is here 
@@ -117,7 +117,7 @@ head(birth)
 
 #for now I am just using Emily's data as I am waiting for Matt to provide me complete records
   
-axy<-read.csv("allaxy_random_7minute_sample.csv", header=T) %>%
+axy<-read.csv("allaxy_consecutive_7minute_sample.csv", header=T) %>%
 	mutate(
 		axy_id=paste(id, date, tod, sep = "-"), 
 		axy_date=ymd(date),
