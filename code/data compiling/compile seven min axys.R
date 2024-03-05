@@ -1,5 +1,5 @@
 #script to pull out seven minutes of data from the accelerometer data
-#Written by A.R.Martinig, E.K.Studd
+#Written by A.R.Martinig, J.I.Sanders, E.K.Studd
 #Last edited Mar 3, 2024 by E.K.Studd
 
 # Load packages ####

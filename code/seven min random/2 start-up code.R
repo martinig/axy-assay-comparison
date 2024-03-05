@@ -94,52 +94,6 @@ head(assays)
 (assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 nrow(assays) #1184
 
-table(assays$sex, assays$ageclass)
-table(assays$observer)
-
-
-assays%>%filter(is.na(trialnumber))
-assays %>% filter(squirrel_id== 13305)
-
-
-########################################
-######  extracting summary stats  ######
-########################################
-
-#total number of inds and sex stats
-other_stats<-assays%>%
-	group_by(squirrel_id)%>%
-	filter(row_number()==1)
-
-(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
-table(other_stats$sex) #sex number
-
-#ageclass stats
-age_class_stats<-assays%>%
-	group_by(squirrel_id, ageclass)%>%
-	filter(row_number()==1)
-
-table(age_class_stats$ageclass) #age class number (remember: some individuals will have multiple records across age classes!)
-table(age_class_stats$ageclass, age_class_stats$sex) 
-
-
-#trial number by age class stats
-adults<-assays %>% filter(ageclass=="A") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)
-
-yearl<-assays%>%filter(ageclass=="Y") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)
-
-ju<-assays%>%filter(ageclass=="J") %>% group_by(squirrel_id) %>% mutate(sum=n()) %>% filter(row_number()==1)
-
-#note: trial number is not reliable for adults or yearlings BECAUSE the count starts with the first trial - which may be during earlier phases (like an adult with 5 trials, could have had 3 of them done as a juvenile) - to get around this, I calculated sums after subsetting
-
-nrow(adults)
-table(adults$sum, adults$sex)
-
-nrow(yearl)
-table(yearl$sum, yearl$sex)
-
-nrow(ju)
-table(ju$sum, ju$sex)
 
 ########################################
 #bare minimum needed for axy data subsets
@@ -161,34 +115,24 @@ head(birth)
 
 #for now I am just using Emily's data as I am waiting for Matt to provide me complete records
   
-axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%
+axy<-read.csv("allaxy_random_7minute_sample.csv", header=T) %>%
 	mutate(
 		axy_id=paste(id, date, tod, sep = "-"), 
 		axy_date=ymd(date),
 		axy_yr=year(date),
 		axy_month=month(date)) %>%
 	filter(!is.na(id)) %>% #remove the rows with NA for squirrel_id
-	select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)
+  	group_by(id, date, datetime) %>%
+  	mutate(row_num = row_number()) %>%
+  	pivot_wider(names_from = All, values_from = row_num, values_fn = length, values_fill = 0) %>%
+  ungroup() %>%
+  select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, axy_id)
 
 head(axy)
 summary(axy)
 
-(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals
-nrow(axy) #38284
+axy %>% filter(squirrel_id== 23286 & axy_id=="23286-2019-08-22-day")
 
 
-
-#conserved theme across plots
-squirrel_theme <- theme_bw() +
-    theme(#legend.position = "top",
-      axis.line = element_line(colour = "black"),
-      panel.grid.major = element_blank(), #eliminates background grid
-      panel.grid.minor = element_blank(), #eliminates background grid
-      panel.border = element_blank(), #eliminates plot border
-      panel.background = element_blank(),
-      axis.title.x = element_text(size = 11), 
-      axis.title.y = element_text(size = 11),
-      axis.text.x = element_text(size = 11, colour = "black"), 
-      axis.text.y = element_text(size = 11, colour = "black"), 
-      legend.title = element_text(size = 11, colour = "black"), 
-      legend.text = element_text(size = 10, colour = "black"))
+(axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #241 individuals
+nrow(axy) #87990

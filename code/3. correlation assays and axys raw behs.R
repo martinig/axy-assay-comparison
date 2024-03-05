@@ -1,34 +1,8 @@
-#robust correlation and pearson's correlation between raw behaviours for focal and assay data
-#last updated Frebruary 27, 2024 by J. I. Sanders
+#pearson's correlations between raw behaviours for axys and assay data
+#last updated March 5, 2024 by A. R. Martinig
 
 # run start up code, focal data subsets 
 Start-up code.R
-focal data subsets.R
-
-library(robustHD)
-library(blme)
-library(lme4)
-library(glmmTMB)
-
-#standardize variables to test for differences between methods (Pearson and robust)
-
-#generate combined dataset
-combine<-dplyr::inner_join(assays, axy, by=("squirrel_id"="squirrel_id")) %>% #extract only the PCA scores for the n=88 subset
-		ungroup() 
-
-#There may be repeated values in some squirrels due to discrepancies in the number of values for assays and axys. If there are more assay values, the axy values will be repeated and vice versa. Right now, we are keeping repeated values.
-
-summary(combine)
-head(combine)
-nrow(combine)
-combine %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
-
-#Pearson's correlation
-attach(combine);tt=cbind(walk, jump, hole, hang, chew, groom, still, feed, forage, nestmove, nestnotmove, notmoving, travel)
-Hmisc::rcorr(tt, type="pearson")
-
-#correlations are the same even if I standardize the variables
-
 
 
 #correlations for unfilterd data to pull out correlations within assays and within focals
