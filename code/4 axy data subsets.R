@@ -1,5 +1,5 @@
 #axy data for the complete dataset
-#last edited March 4, 2024 by A. R. Martinig
+#last edited March 19, 2024 by J. I. Sanders
 
 #run the following prior to running script:
 start-up code.R
@@ -53,7 +53,7 @@ table(axy1$sex)
 nrow(axy1) #38284
 
 #deployment dates needed to calculate the exact number of sessions
-(axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 852 sessions 
+(axy1) %>% as_tibble() %>% count(squirrel_id, axy_date) %>% nrow() #approximately 9628 deployment days 
 
 #year range
 table(axy1$axy_yr)
