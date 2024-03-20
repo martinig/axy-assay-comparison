@@ -1,6 +1,6 @@
 #multivariate models for assay and axy principal components (PC1, PC2, no PC3 at this time)
 #global dataset 
-#last edited Feb 27, 2024 by A. R. Martinig
+#last edited Mar 20, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -50,7 +50,7 @@ merged
 summary(merged) 
 head(merged)
 
-(merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1090 individuals
+(merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1095 individuals
 
 
  
@@ -88,7 +88,7 @@ summary(final_MCMC)
 head(final_MCMC)
 names(final_MCMC)
 
-(final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1089 individuals
+(final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1094 individuals
 
 
 #write.csv(final_MCMC, "/Users/april-martinig/Desktop/final_dataset.csv")
