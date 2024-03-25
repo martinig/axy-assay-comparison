@@ -24,12 +24,12 @@ my_colors <-
 
 ggplot(rep, aes(x = age, y = Repeatability, shape = Behaviour, colour=Method, linetype=rep_type)) + #group = behaviour seems to override the position_dodge for the points
   	geom_point(position = position_dodge(width = 0.3), size = 5) + 
-  	scale_x_discrete(labels=c("A" = "Adult", "Y" = "Yearling")) +
+  	scale_x_discrete(labels=c("A" = "Adult", "J" = "Juvenile", "Y" = "Yearling")) +
   	scale_linetype_manual(values=c("solid", "dashed"), labels=c("non_adjusted" = "Non-adjusted", "adjusted" = "Adjusted"), name = "Repeatability type") +
   	scale_colour_manual(values = c("#D55E00", "#0072B2", "black"), name = "Method", 
   			breaks=c("Assay","Accelerometer"),
   			labels=c("Assay" = "Assay", "Accelerometer" = "Accelerometer"))+ 
-    scale_shape_manual(name="Accelerometer behaviour", values=c(19,17), labels=c("PC1" = "Behavioural axis 1", "PC2" = "Behavioural axis 2")) +			
+    scale_shape_manual(name="Accelerometer behaviour", values=c(19,17,15,18), labels=c("sPC1" = "Assay Behavioural axis 1", "sPC2" = "Assay Behavioural axis 2", "xPC1" = "Accelerometer Behavioural axis 1", "xPC2" = "Accelerometer Behavioural axis 2")) +			
   coord_cartesian(ylim=c(0, 0.6), clip="off")+ #set the range
   guides(linetype = guide_legend(keyheight=2, order=2), colour = guide_legend(keyheight=2, order=3), shape = guide_legend(keyheight=1.2, order=1)) + #keyheight changes space btw rows, order changes order of multiple legend items #linetype=FALSE #removes the legend showing line type
   geom_errorbar(aes(ymin=LCI, ymax=UCI), position=pd, width=0.1, size=0.5)+ 
