@@ -1,5 +1,6 @@
 #axy data for the complete dataset
-#last edited March 19, 2024 by J. I. Sanders
+#code written by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R

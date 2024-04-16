@@ -1,7 +1,8 @@
 #this is the first R script that always needs to be run
 #all the data cleaning is here 
 #if a mistake is found message April before making changes
-#Last edited on March 5, 2024 by A. R. Martinig 
+#code written by A. R. Martinig
+#last edited on April 16, 2024 by A. R. Martinig 
 
 #axy-assay analysis for Jonas
 
@@ -80,7 +81,7 @@ assays<-read.csv("raw assays.csv", header=T) %>%
 		approachlatency=(approachlatency/300)) %>%
 	
 	filter(!squirrel_id== 23686, #IT DOES NOT HAVE A SEX LISTED ANYWHERE!
-	
+	!ageclass=="J",
 	!is.na(squirrel_id), !observer %in% c("SWK"), is.na(hang) |hang<=1, is.na(chew) |chew<=1, is.na(still) |still<=1, is.na(front) | front<=1, is.na(back) |back<=1, is.na(attack) |attack<=0.96, is.na(attacklatency) |attacklatency<=1, is.na(approachlatency) |approachlatency<=1) %>% 
 	#attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds 
 	#only excludes 2 squirrels from our n=88 dataset, the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks
@@ -91,8 +92,8 @@ assays<-read.csv("raw assays.csv", header=T) %>%
 summary(assays)
 head(assays)
 
-(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
-nrow(assays) #1184
+(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #543 individuals
+nrow(assays) #742
 
 table(assays$sex, assays$ageclass)
 table(assays$observer)
@@ -111,7 +112,7 @@ other_stats<-assays%>%
 	group_by(squirrel_id)%>%
 	filter(row_number()==1)
 
-(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
+(other_stats) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #543 individuals
 table(other_stats$sex) #sex number
 
 #ageclass stats
