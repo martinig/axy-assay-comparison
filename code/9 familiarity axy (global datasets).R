@@ -1,6 +1,6 @@
-#code to calculate familiarity scores (axys dataset)
+#code to calculate familiarity scores (axy dataset)
 #original code by E. R. Siracusa
-#last updated on Feb 13, 2024 by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R

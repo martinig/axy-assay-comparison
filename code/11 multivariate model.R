@@ -1,6 +1,7 @@
 #multivariate models for assay and axy principal components (PC1, PC2, no PC3 at this time)
 #global dataset 
-#last edited Mar 20, 2024 by A. R. Martinig
+#original code by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -11,9 +12,6 @@ PCA Generation Code - axy.R
 local density (global datasets).R
 familiarity assays (global datasets).R
 familiarity axy (global datasets).R
-
-library(MCMCglmm)
-library(data.table)
 
 merged_assays<-personality_all %>% 
 	ungroup() %>% 
@@ -50,7 +48,7 @@ merged
 summary(merged) 
 head(merged)
 
-(merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1095 individuals
+(merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 
 
  
@@ -77,9 +75,7 @@ final_MCMC<-merged%>%
   		date = if(n() == 1 && !is.na(date) | sum(!is.na(date)) == 1) 0 * date
   			else ((date-mean(date, na.rm=T))/(1*(sd(date, na.rm=T)))), 
   			date = replace(date, is.nan(date), 0)) %>%
-    	ungroup() %>%
-    	filter(!squirrel_id==100071) #%>% #remove this problem squirrel because we are missing so much data for it!
-    	#filter(!is.na(avg_fam)) #we have a lot of NAs for this - APRIL needs to investigate (Jan 16, 2024)
+    	ungroup() 
 
 final_MCMC %>% filter(is.na(age))              
 #make sure to always check for new NAs after standardization because it doesnt work when a squirrel is the only individual in their grid and year; give mean values (0) to these records
@@ -88,8 +84,8 @@ summary(final_MCMC)
 head(final_MCMC)
 names(final_MCMC)
 
-(final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #1094 individuals
-
+(final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
+nrow(final_MCMC) #39021
 
 #write.csv(final_MCMC, "/Users/april-martinig/Desktop/final_dataset.csv")
 
@@ -97,8 +93,8 @@ names(final_MCMC)
 attach(final_MCMC);tt=cbind(year, age, age2, local.density, avg_fam, date)
 cor(tt)  
  
-#age & age2 = 0.96454021
-#next highest correlation was 0.29079603	
+#age & age2 = 0.96711058
+#next highest correlation was -0.28409975	
 
 
 #bayesian multivariate generalized linear model analysis 

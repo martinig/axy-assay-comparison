@@ -1,5 +1,6 @@
 #pearson's correlations between raw behaviours for axys and assay data
-#last updated March 5, 2024 by A. R. Martinig
+#original code by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
 # run
 Start-up code.R

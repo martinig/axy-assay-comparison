@@ -1,4 +1,5 @@
 #code to generate repeatability comparison plot for assays and axys
+#original code by A. R. Martinig
 #last edited March 24, 2024 by J. I. Sanders
 
 # run start up code, focal data subsets 

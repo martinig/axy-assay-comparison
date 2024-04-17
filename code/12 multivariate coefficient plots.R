@@ -1,10 +1,7 @@
 #code to make the coefficient plots from the multivariate models for assay and axy principal components (PC1, PC2)
-#last edited Feb 29, 2024 by A. R. Martinig
+#original code by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
-library(lattice)
-library(ggplot2)
-library(stats)
-library(cowplot)
 
 #response variables
 ## name your predicted factor latent.mean, and the CI between latent.lower and latent.upper

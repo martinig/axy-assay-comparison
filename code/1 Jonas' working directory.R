@@ -1,9 +1,6 @@
-#this is the first R script that always needs to be run
-#all the data cleaning is here 
-#if a mistake is found message April before making changes
-#Last edited on Dec 12, 2023 by A. R. Martinig 
-
-#axy-assay analysis for Jonas
+#working directory here
+#original code by A. R. Martinig
+#last edited April 16, 2024 by A. R. Martinig
 
 #Delete previous information stored 
 rm(list=ls(all=T))

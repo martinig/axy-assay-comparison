@@ -1,4 +1,4 @@
-#code to calculate familiarity scores (assays dataset)
+#code to calculate familiarity scores (assay dataset)
 #original code by E. R. Siracusa
 #last updated on Feb 13, 2024 by A. R. Martinig
 
