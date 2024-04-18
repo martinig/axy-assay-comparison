@@ -3,10 +3,10 @@
 #last edited April 16, 2024 by A. R. Martinig
 
 #run the following prior to running script:
-start-up code.R
-PCA Generation Code - Assays.R
-local density (global datasets).R
-familiarity assays (global datasets).R
+#start-up code.R
+#PCA Generation Code - Assays.R
+#local density (global datasets).R
+#familiarity assays (global datasets).R
 
 adult_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="A") %>% 

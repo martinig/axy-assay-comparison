@@ -5,11 +5,11 @@
 #last edited April 16, 2024 by A. R. Martinig
 
 #run the following prior to running script:
-start-up code.R
-axy data subsets.R
-PCA generation code - axy.R
-local density (global datasets).R
-familiarity axy (global datasets).R
+#start-up code.R
+#axy data subsets.R
+#PCA generation code - axy.R
+#local density (global datasets).R
+#familiarity axy (global datasets).R
 
 
 #create working dataframe

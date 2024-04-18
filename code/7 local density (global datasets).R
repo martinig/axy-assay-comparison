@@ -3,9 +3,9 @@
 #last updated on Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
-start-up code.R
-axy data subsets.R
-PCA Generation Code - Assays.R
+#start-up code.R
+#axy data subsets.R
+#PCA Generation Code - Assays.R
 
 distance <- 130 #establish your radius for collecting neighbourhood data
 neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in

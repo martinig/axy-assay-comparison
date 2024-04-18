@@ -6,11 +6,11 @@
 
 
 #run the following prior to running script:
-start-up code.R
-axy data subsets.R
-PCA generation code - axy.R
-local density (global datasets).R
-familiarity axy (global datasets).R
+#start-up code.R
+#axy data subsets.R
+#PCA generation code - axy.R
+#local density (global datasets).R
+#familiarity axy (global datasets).R
 
 #create working dataframe
 yearling_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%

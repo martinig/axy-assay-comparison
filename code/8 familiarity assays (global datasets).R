@@ -3,9 +3,9 @@
 #last updated on Feb 13, 2024 by A. R. Martinig
 
 #run the following prior to running script:
-start-up code.R
-focal data subsets.R
-local density.R
+#start-up code.R
+#focal data subsets.R
+#local density.R
 
 assay.neighbours.all <- data.frame() #create an empty data frame to store the iterations of your loop in
 

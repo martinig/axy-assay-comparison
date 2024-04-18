@@ -227,7 +227,8 @@ table(yrs$sum, yrs$sex)
 
 
 
-#conserved theme across plots for dot-whisker plots
+#conserved theme across plots for plots
+#general theme
 theme_squirrel <-
 	theme_bw() +
 	theme(axis.line = element_line(colour = "black"),
@@ -238,7 +239,8 @@ theme_squirrel <-
         panel.border = element_blank(),
         panel.background = element_blank(),
         text = element_text(size = 15)) 
-        
+ 
+#dot-whisker plot theme       
 theme_squirrel_dot <- 
 	theme_bw() +
  	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
