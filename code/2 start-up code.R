@@ -1,6 +1,6 @@
 #all the data cleaning is here 
 #original code by A. R. Martinig
-#last edited on April 17, 2024 by A. R. Martinig 
+#last edited on April 18, 2024 by A. R. Martinig 
 
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror
 
@@ -227,17 +227,30 @@ table(yrs$sum, yrs$sex)
 
 
 
-#conserved theme across plots
-squirrel_theme <- theme_bw() +
-    theme(#legend.position = "top",
-      axis.line = element_line(colour = "black"),
-      panel.grid.major = element_blank(), #eliminates background grid
-      panel.grid.minor = element_blank(), #eliminates background grid
-      panel.border = element_blank(), #eliminates plot border
-      panel.background = element_blank(),
-      axis.title.x = element_text(size = 11), 
-      axis.title.y = element_text(size = 11),
-      axis.text.x = element_text(size = 11, colour = "black"), 
-      axis.text.y = element_text(size = 11, colour = "black"), 
-      legend.title = element_text(size = 11, colour = "black"), 
-      legend.text = element_text(size = 10, colour = "black"))
+#conserved theme across plots for dot-whisker plots
+theme_squirrel <-
+	theme_bw() +
+	theme(axis.line = element_line(colour = "black"),
+        axis.text=element_text(size=15), #changes size of axes #s
+        axis.title=element_text(size=15), #changes size of axes labels
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(size = 15)) 
+        
+theme_squirrel_dot <- 
+	theme_bw() +
+ 	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
+		axis.line=element_line(),
+		axis.line.y=element_blank(),
+		axis.ticks.length=unit(0.4, "cm"),
+		axis.ticks.y=element_blank(),
+    	axis.text=element_text(size=10), #changes size of axes #s
+        axis.title=element_text(size=15), #changes size of axes labels
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_blank(),
+        text = element_text(size = 10))      
+        

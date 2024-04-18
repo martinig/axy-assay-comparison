@@ -1,6 +1,6 @@
 #code to make the coefficient plots from the multivariate models for assay and axy principal components (PC1, PC2)
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 18, 2024 by A. R. Martinig
 
 
 #response variables
@@ -34,19 +34,11 @@ A<-ggplot(plot.dat,
 	geom_point(shape=16,cex=4, color="black") + 
 	scale_x_continuous(breaks = scales::pretty_breaks(4)) +
 	scale_y_discrete(breaks = c("OFT1:OFT2", "OFT1:PC1", "OFT1:PC2", "OFT2:PC1", "OFT2:PC2"),
-			labels = c("Assay BA1 \n& Assay BA2", "Assay BA1 \n& Axy BA1", "Assay BA1 \n& Axy BA2", "Assay BA2 \n& Axy BA1", "Assay BA2 \n& Axy BA2"),
+			labels = c("Activity &\nexploration", "Activity &\nforaging", "Activity &\n movement", "Exploration\n& foraging", "Exploration &\nmovement"),
 			expand=c(0,0.5,0,0.5)) + #if you want to change the spacing between ticks
 	xlab("Estimate ± 95% credible intervals") + 
 	ylab("Among-individual correlations") +
-	theme_bw() +
-	theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=15), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 15))
+	theme_squirrel
  A      
 
 
@@ -82,19 +74,12 @@ B<-ggplot(plot.dat2,
 	geom_point(shape=16,cex=4, color="black") +  
 	scale_x_continuous(breaks = scales::pretty_breaks(4)) +
 	scale_y_discrete(breaks = c("OFT1:OFT2", "OFT1:PC1", "OFT1:PC2", "OFT2:PC1", "OFT2:PC2"),
-			labels = c("Assay BA1 \n& Assay BA2", "Assay BA1 \n& Axy BA1", "Assay BA1 \n& Axy BA2", "Assay BA2 \n& Axy BA1", "Assay BA2 \n& Axy BA2"),
+			labels = c("Activity &\nexploration", "Activity &\nforaging", "Activity &\n movement", "Exploration\n& foraging", "Exploration &\nmovement"),
 			expand=c(0,0.5,0,0.5)) +
 	xlab("Estimate ± 95% credible intervals") + 
 	ylab("Within-individual correlations") +
-	theme_bw() +
-	theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=15), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 15))
+	theme_squirrel
+
 B
 
 plot_grid(A, B, labels=c("(a)", "(b)"), ncol = 2, nrow =1, align = "hv", label_x=0.89, label_y=1)       
@@ -102,9 +87,9 @@ plot_grid(A, B, labels=c("(a)", "(b)"), ncol = 2, nrow =1, align = "hv", label_x
 
 
 ## figure for fixed effects
-latent.mean <- apply(mod.1$Sol[,5:24],2,mean)
-latent.lower <- apply(mod.1$Sol[,5:24], 2, function(x) quantile(x, probs = c(0.025)))
-latent.upper <- apply(mod.1$Sol[,5:24], 2, function(x) quantile(x, probs = c(0.975)))
+latent.mean <- apply(mod.1$Sol[,5:28],2,mean)
+latent.lower <- apply(mod.1$Sol[,5:28], 2, function(x) quantile(x, probs = c(0.025)))
+latent.upper <- apply(mod.1$Sol[,5:28], 2, function(x) quantile(x, probs = c(0.975)))
 subject <- c("traitOFT1:sexM", 
 			"traitOFT2:sexM", 
 			"traitPC1:sexM",
@@ -113,10 +98,10 @@ subject <- c("traitOFT1:sexM",
 		"traitOFT2:age", 
 		"traitPC1:age",
 		"traitPC2:age", 
-				#"traitOFT1:age2", 
-				#"traitOFT2:age2", 
-				#"traitPC1:age2",
-				#"traitPC2:age2", 
+				"traitOFT1:age2", 
+				"traitOFT2:age2", 
+				"traitPC1:age2",
+				"traitPC2:age2", 
 					"traitOFT1:local.density", 
 					"traitOFT2:local.density", 
 					"traitPC1:local.density",
@@ -141,9 +126,9 @@ plot.dat$subject2 <- reorder(plot.dat$subject, plot.dat$latent.mean)
 
 
 #OFT1 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
 
 C<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -154,34 +139,20 @@ C<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") + 
-	#geom_point(shape=16,cex=5, color="white") + 
-	#geom_point(shape=16,cex=3, color="#CC79A7") + 
-	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 1), , expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 3), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"),
-			labels = c("Sex", "Age","Julian date", "Density", "Familiarity")) +
-	xlab("Assay behavioural axis 1") + 
+	breaks = c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"),
+	labels = c("Sex", "Age",expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	xlab("Activity") + 
 	ylab("") +
-	theme_bw() +
-	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
-		axis.line=element_line(),
-		axis.line.y=element_blank(),
-		axis.ticks.length=unit(0.4, "cm"),
-		axis.ticks.y=element_blank(),
-        axis.text=element_text(size=10), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 10))
+	theme_squirrel_dot 
 C
 
 
 #OFT2 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT2:sexM",  "traitOFT2:age",  "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT2:sexM",  "traitOFT2:age",  "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
 
 D<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -192,34 +163,20 @@ D<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +	
 	geom_point(shape=16,cex=2, color="black") + 
-	#geom_point(shape=16,cex=5, color="white") + 
-	#geom_point(shape=16,cex=3, color="#CC79A7") +
-	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1.0), position="top", limits = c(-1, 1), , expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1.0), position="top", limits = c(-1, 2), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"),
-			labels = c("Sex", "Age", "Julian date", "Density", "Familiarity")) +
-	xlab("Assay behavioural axis 2") + 
+	breaks = c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"),
+	labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	xlab("Exploration") + 
 	ylab("") +
-	theme_bw() +
-	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
-		axis.line=element_line(),
-		axis.line.y=element_blank(),
-		axis.ticks.length=unit(0.4, "cm"),
-		axis.ticks.y=element_blank(),
-        axis.text=element_text(size=10), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 10))
+	theme_squirrel_dot 
 D
 
 
 #PC1 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age",  "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
 
 E<-ggplot(plot.dat2,  
 	aes(x = latent.mean, y = subject2)) + 
@@ -230,34 +187,20 @@ E<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") + 
-	#geom_point(shape=16,cex=5, color="white") + 
-	#geom_point(shape=16,cex=3, color="#CC79A7") +
-	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 1), , expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-2, 1), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitPC1:sexM",  "traitPC1:age", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"),
-			labels = c("Sex", "Age", "Julian date", "Density", "Familiarity")) +
-	xlab("Axy behavioural axis 1") + 
+		breaks = c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"),
+		labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	xlab("Foraging") + 
 	ylab("") +
-	theme_bw() +
-	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
-		axis.line=element_line(),
-		axis.line.y=element_blank(),
-		axis.ticks.length=unit(0.4, "cm"),
-		axis.ticks.y=element_blank(),
-        axis.text=element_text(size=10), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 10))
+	theme_squirrel_dot 
 E
 
 
 #PC2 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC2:sexM",  "traitPC2:age", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC2:sexM",  "traitPC2:age", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
 
 F<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -267,28 +210,14 @@ F<-ggplot(plot.dat2,
 		xend = latent.upper, 
 		y = subject2, 
 		yend = subject2), size=0.3) +
-	geom_point(shape=16,cex=2, color="black") + 
-	#geom_point(shape=16,cex=5, color="white") + 
-	#geom_point(shape=16,cex=3, color="#CC79A7") + 
-	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 1), , expand = c(0,0)) +
+	geom_point(shape=16,cex=2, color="black") +  
+	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 2), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitPC2:sexM",  "traitPC2:age", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"),
-			labels = c("Sex", "Age", "Julian date", "Density", "Familiarity")) +
-	xlab("Axy behavioural axis 2") + 
+		breaks = c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"),
+		labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	xlab("Movement") + 
 	ylab("") +
-	theme_bw() +
-	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
-		axis.line=element_line(),
-		axis.line.y=element_blank(),
-		axis.ticks.length=unit(0.4, "cm"),
-		axis.ticks.y=element_blank(),
-    	axis.text=element_text(size=10), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 10))
+	theme_squirrel_dot 
 F
 
 

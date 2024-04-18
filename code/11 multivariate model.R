@@ -121,8 +121,6 @@ prior.iw<-list(
 				
 final_MCMC<-as.data.frame(final_MCMC)
 
-#write.csv(final_MCMC, "/Users/april-martinig/Desktop/final_MCMC.csv")
-
 ###model structure...double check that variables are written correctly (e.g., capitalization, underscoring, etc.)
 mod.1 <- MCMCglmm(
 	cbind(OFT1, OFT2, PC1, PC2) ~ 

@@ -9,7 +9,7 @@ rm(list=ls(all=T))#
 setwd("~/Documents/Files/Post-docs/UofC/Jonas (ECOL 530)/axy-assay-comparison/data")
 #all the data cleaning is here #
 #original code by A. R. Martinig#
-#last edited on April 16, 2024 by A. R. Martinig #
+#last edited on April 18, 2024 by A. R. Martinig #
 #
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
 #
@@ -140,42 +140,21 @@ summary(axy)#
 #
 (axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals#
 nrow(axy) #38284#
-#conserved theme across plots#
-squirrel_theme <- theme_bw() +#
-    theme(#legend.position = "top",#
-      axis.line = element_line(colour = "black"),#
-      panel.grid.major = element_blank(), #eliminates background grid#
-      panel.grid.minor = element_blank(), #eliminates background grid#
-      panel.border = element_blank(), #eliminates plot border#
-      panel.background = element_blank(),#
-      axis.title.x = element_text(size = 11), #
-      axis.title.y = element_text(size = 11),#
-      axis.text.x = element_text(size = 11, colour = "black"), #
-      axis.text.y = element_text(size = 11, colour = "black"), #
-      legend.title = element_text(size = 11, colour = "black"), #
-      legend.text = element_text(size = 10, colour = "black"))
-#axy data for the complete dataset#
-#original code by A. R. Martinig#
-#last edited April 16, 2024 by A. R. Martinig#
-#run the following prior to running script:#
-start-up code.R#
-#
 #########################################
 #complete axy dataset, n=340 inds#
-#before merging with personality data#
 #########################################
 #
 axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%#
-	group_by(axy_id, squirrel_id) %>%#
-  	mutate(#
-  		axy_age = axy_yr-byear, #calc age#
-  		axy_ageclass = ifelse(axy_age==1, "Y", #
-  			ifelse(axy_age >1, "A",#
-        	ifelse(axy_age < 1, "J", "")))) %>% #creating age class  #
-     ungroup() %>%   	      	#
-##group by squirrel id and axy id (treats each axy as behavior trial) #
-	group_by(squirrel_id, axy_id) %>%#
-    mutate(total_obs=sum(total), #
+  group_by(axy_id, squirrel_id) %>%#
+  mutate(#
+    axy_age = axy_yr-byear, #calc age#
+    axy_ageclass = ifelse(axy_age==1, "Y", #
+                          ifelse(axy_age >1, "A",#
+                                 ifelse(axy_age < 1, "J", "")))) %>% #creating age class  #
+  ungroup() %>%   	      	#
+  ##group by squirrel id and axy id (treats each axy as behavior trial) #
+  group_by(squirrel_id, axy_id) %>%#
+  mutate(total_obs=sum(total), #
          #get the totals for each behaviour#
          total_feeding=sum(feed),#
          total_foraging=sum(forage),#
@@ -190,8 +169,8 @@ axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%#
          prop_nestnotmoving =(total_nestnotmoving/total_obs),#
          prop_notmoving =(total_notmoving/total_obs),#
          prop_travel=(total_travel/total_obs)) %>%#
-	filter(row_number()==1, #keep only one row#
-	!axy_ageclass=="J") %>% #remove the 1 male juvenile#
+  filter(row_number()==1, #keep only one row#
+         !axy_ageclass=="J") %>% #remove the 1 male juvenile#
   ungroup() %>%#
   droplevels() %>%#
   select(-c(total, total_obs, total_feeding, total_foraging, total_nestmoving, total_nestnotmoving, total_notmoving, total_travel))#
@@ -240,4 +219,90 @@ nrow(ads)#
 table(ads$sum, ads$sex)#
 #
 nrow(yrs)#
-table(yrs$sum, yrs$sex)
+table(yrs$sum, yrs$sex)#
+#conserved theme across plots for dot-whisker plots#
+theme_squirrel <-#
+	theme_bw() +#
+	theme(axis.line = element_line(colour = "black"),#
+        axis.text=element_text(size=15), #changes size of axes #s#
+        axis.title=element_text(size=15), #changes size of axes labels#
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
+        panel.border = element_blank(),#
+        panel.background = element_blank(),#
+        text = element_text(size = 15)) #
+theme_squirrel_dot <- #
+	theme_bw() +#
+ 	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),#
+		axis.line=element_line(),#
+		axis.line.y=element_blank(),#
+		axis.ticks.length=unit(0.4, "cm"),#
+		axis.ticks.y=element_blank(),#
+    	axis.text=element_text(size=10), #changes size of axes #s#
+        axis.title=element_text(size=15), #changes size of axes labels#
+        panel.grid.major = element_blank(),#
+        panel.grid.minor = element_blank(),#
+        panel.border = element_blank(),#
+        panel.background = element_blank(),#
+        text = element_text(size = 10))
+names(assays)#
+summary(assays)#
+(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #543 individuals#
+nrow(assays)#
+#
+### script for running PCA on select columns from data set#
+###need to check that you use the right set of behaviours, and that they are formatted as was done previously#
+##e.g., proportion of time, counts, yes/no, etc.#
+OFT<-prcomp(assays[c("walk", "jump", "hole", "hang", "chew", "groom", "still")], center=TRUE, scale =TRUE)#
+summary(OFT)#
+OFT
+###script for adding PC1 and PC2 column of OFT to data table#
+assays$OFT1<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,1]#
+assays$OFT2<-(-1)*prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,2]#
+############# note I flip the sigh for PC2 so that postive PC2 values mean more exploration ##################
+#
+OFT_only<-assays%>%select(squirrel_id, OFT1, OFT2, trialnumber)			#
+#
+personality_all<-assays%>% #
+	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)#
+#
+summary(personality_all)#
+#
+personality_all %>% as_tibble() %>% count(squirrel_id) %>% nrow() #543 individuals#
+personality_all %>% as_tibble() %>% count(sex) %>% nrow() #2 sexes#
+nrow(personality_all) #741
+#PCA calculations for axy behaviours #
+#original code by A. R. Martinig#
+#last edited April 16, 2024 by A. R. Martinig#
+#
+#run the following prior to running script:#
+start-up code.R#
+axy data subsets.R#
+#########################################
+#complete axy dataset, n=340 inds#
+#before merging with personality data#
+#########################################
+#
+colnames(axy1)#
+#
+PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)#
+summary(PCaxys1) #
+PCaxys1#
+##PC1: feeding, foraging, -nestnotmoving, travel#
+##PC2: -nestnotmoving, notmoving#
+##PC3: nestmoveing#
+#
+#add PCs to dataset#
+axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]#
+axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2] #
+#############note I flip the sigh for PC2 so that postive PC2 values mean more movement
+#Connect to database - replace with your username below#
+#original code by A. R. Martinig#
+#last edited April 16, 2024 by A. R. Martinig#
+#
+#APRIL's connection to database#
+con <- krsp_connect (host = "krsp.cepb5cjvqban.us-east-2.rds.amazonaws.com",#
+                  dbname ="krsp",#
+             user="amartinig",#
+           password = keyring::key_get("krsp")#
+)

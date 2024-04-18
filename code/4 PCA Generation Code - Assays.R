@@ -1,6 +1,6 @@
 #PCA generation for OFT scores
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 18, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -31,7 +31,8 @@ OFT
 
 ###script for adding PC1 and PC2 column of OFT to data table
 assays$OFT1<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,1]
-assays$OFT2<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,2]
+assays$OFT2<-(-1)*prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,2]
+############# note I flip the sigh for PC2 so that postive PC2 values mean more exploration #################
 
 OFT_only<-assays%>%select(squirrel_id, OFT1, OFT2, trialnumber)			
 
