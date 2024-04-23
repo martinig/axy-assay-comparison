@@ -32,7 +32,7 @@ OFT
 ###script for adding PC1 and PC2 column of OFT to data table
 assays$OFT1<-prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,1]
 assays$OFT2<-(-1)*prcomp(~walk +jump+ hole + hang +chew +groom + still, data= assays, center=TRUE, scale =TRUE)$x[,2]
-############# note I flip the sigh for PC2 so that postive PC2 values mean more exploration #################
+############# note I flip the sign for PC2 so that postive PC2 values mean more exploration #################
 
 OFT_only<-assays%>%select(squirrel_id, OFT1, OFT2, trialnumber)			
 

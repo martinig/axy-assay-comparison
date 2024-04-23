@@ -24,4 +24,4 @@ PCaxys1
 #add PCs to dataset
 axy1$PC1<-prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]
 axy1$PC2<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,2] 
-#############note I flip the sigh for PC2 so that postive PC2 values mean more movement#################
+#############note I flip the sign for PC2 so that postive PC2 values mean more movement#################
