@@ -1,7 +1,7 @@
 #multivariate models for assay and axy principal components (PC1, PC2, no PC3 at this time)
 #global dataset 
 #original code by A. R. Martinig
-#last edited April 20, 2024 by A. R. Martinig
+#last edited April 23, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -51,40 +51,38 @@ head(merged)
 (merged) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 
 
- 
 final_MCMC<-merged%>% 
   	mutate(
-  		  grid_yr=paste(grid, year, sep=""),
+  		grid=ifelse(grid=="SUX", "SU", grid),
+  		grid_yr=paste(grid, year, sep=""),
   		date=yday(trialdate), #converts dates to days since Jan 1st!
          age2=age^2,
          local.density=assay.local.density,
          avg_fam =assay_avg_fam) %>% #make a quadratic age variable
   mutate(year=year-2005) %>% 
    group_by(grid)%>%
-   #a lot of fancy code to deal with existing NAs (don't want to replace), new NAs that come up because of the way standardization works, and other ridiculous coding issues with the dataset
-         mutate(age =  if(n() == 1) 0 * age
-  			else (age-mean(age, na.rm=T))/(1*(sd(age, na.rm=T))), 
-  			age = replace(age, is.nan(age), 0),
-  		age2 =  if(n() == 1) 0 * age2
-  			else (age2-mean(age2, na.rm=T))/(1*(sd(age2, na.rm=T))), 
-  			age2 = replace(age2, is.nan(age2), 0),
-       	local.density = if(n() == 1 && !is.na(local.density) | sum(!is.na(local.density)) == 1) 0 * local.density
-  			else ((local.density-mean(local.density, na.rm=T))/(1*(sd(local.density, na.rm=T)))), 
-  			local.density = replace(local.density, is.nan(local.density), 0),
-  		avg_fam = if(n() == 1 && !is.na(avg_fam) | sum(!is.na(avg_fam)) == 1) 0 * avg_fam
-  			else ((avg_fam-mean(avg_fam, na.rm=T))/(1*(sd(avg_fam, na.rm=T)))), 
-  			avg_fam = replace(avg_fam, is.nan(avg_fam), 0),
-  		date = if(n() == 1 && !is.na(date) | sum(!is.na(date)) == 1) 0 * date
-  			else ((date-mean(date, na.rm=T))/(1*(sd(date, na.rm=T)))), 
-  			date = replace(date, is.nan(date), 0)) %>%
-    	ungroup() 
+   #new NAs that come up because of the way standardization works are replaced with 0
+   mutate(age=((age-mean(age))/(1*(sd(age)))),
+ 		age = replace(age, is.na(age), 0),
+   		age2 =((age2-mean(age2))/(1*(sd(age2)))),
+   		age2 = replace(age2, is.na(age2), 0),
+		local.density =((local.density-mean(local.density))/(1*(sd(local.density)))),
+ 		local.density = replace(local.density, is.na(local.density), 0),
+		avg_fam =((avg_fam-mean(avg_fam))/(1*(sd(avg_fam)))),
+ 		avg_fam = replace(avg_fam, is.na(avg_fam), 0),
+		date =((date-mean(date))/(1*(sd(date)))),
+		date = replace(date, is.na(date), 0)) %>%
+	ungroup()
 
-final_MCMC %>% filter(is.na(age))              
+ 
+final_MCMC %>% filter(is.na(age_sd))              
 #make sure to always check for new NAs after standardization because it doesnt work when a squirrel is the only individual in their grid and year; give mean values (0) to these records
 
 summary(final_MCMC)
 head(final_MCMC)
 names(final_MCMC)
+table(final_MCMC$grid)
+
 
 (final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 nrow(final_MCMC) #39021
@@ -129,7 +127,7 @@ mod.1 <- MCMCglmm(
 	trait-1 +
 	trait:sex +
 	trait:age +
-	#trait:age2 +
+	trait:age2 +
 	trait:date +
 	trait:local.density +
 	trait:avg_fam,
@@ -144,7 +142,7 @@ mod.1 <- MCMCglmm(
 	thin=300, #interval at which the Markov chain is stored
 	burnin=3000) #number of iterations before samples are stored
 
-summary(mod.1)
+summary(mod.1) 
 #plot(mod.1)
  
 # Posterior distribution of location effects

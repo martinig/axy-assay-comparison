@@ -1,6 +1,6 @@
 #repeatability estimates for yearling squirrels for the assay complete dataset
 #original code by A. R. Martinig
-#last edited April 21, 2024 by A. R. Martinig
+#last edited April 23, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -12,6 +12,7 @@
 yearling_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="Y") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),
+  		grid=ifelse(grid=="SUX", "SU", grid),
 		grid_yr=paste(grid, year, sep=""),
 		year=year-2005) %>%
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects 
@@ -117,7 +118,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| grid_yr), data= yearling_assay_all)
+m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all) #note that fit is singular when I use grid_yr, so using year for this model only
 summary(m4a)
 
 plot(m4a) 

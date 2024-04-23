@@ -1,6 +1,6 @@
 #code to make the coefficient plots from the multivariate models for assay and axy principal components (PC1, PC2)
 #original code by A. R. Martinig
-#last edited April 20, 2024 by A. R. Martinig
+#last edited April 23, 2024 by A. R. Martinig
 
 
 #response variables
@@ -142,7 +142,7 @@ C<-ggplot(plot.dat2,
 	scale_x_continuous(breaks = c(-1, 0, 1, 2, 3), position="top", limits = c(-1, 3), expand = c(0,0)) +
 	scale_y_discrete(
 	breaks = c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"),
-	labels = c("Sex", "Age",expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	labels = c("Sex", "Age",expression("Age"^2),  "Local density", "Social familiarity", "Day of year")) +
 	xlab("Activity") + 
 	ylab("") +
 	theme_squirrel_dot 
@@ -166,7 +166,7 @@ D<-ggplot(plot.dat2,
 	scale_x_continuous(breaks = c(-1, 0,1.0, 2), position="top", limits = c(-1.05, 2), expand = c(0,0)) +
 	scale_y_discrete(
 	breaks = c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"),
-	labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+	labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity",  "Day of year")) +
 	xlab("Exploration") + 
 	ylab("") +
 	theme_squirrel_dot 
@@ -187,10 +187,10 @@ E<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") + 
-	scale_x_continuous(breaks = c(-2, -1, 0, 1), position="top", limits = c(-2, 1.05), expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-2, -1, 0, 1), position="top", limits = c(-2, 1.1), expand = c(0,0)) +
 	scale_y_discrete(
 		breaks = c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"),
-		labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+		labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity",  "Day of year")) +
 	xlab("Foraging") + 
 	ylab("") +
 	theme_squirrel_dot 
@@ -214,7 +214,7 @@ F<-ggplot(plot.dat2,
 	scale_x_continuous(breaks = c(-1, 0, 1, 2), position="top", limits = c(-1, 2), expand = c(0,0)) +
 	scale_y_discrete(
 		breaks = c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"),
-		labels = c("Sex", "Age", expression("Age"^2),  "Density", "Familiarity", "Day of year")) +
+		labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity", "Day of year")) +
 	xlab("Movement") + 
 	ylab("") +
 	theme_squirrel_dot 

@@ -1,6 +1,6 @@
 #repeatability estimates for adult squirrels for the assay complete dataset
 #original code by A. R. Martinig
-#last edited April 21, 2024 by A. R. Martinig
+#last edited April 23, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 #start-up code.R
@@ -11,6 +11,7 @@
 adult_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="A") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),
+  		grid=ifelse(grid=="SUX", "SU", grid),
 		grid_yr=paste(grid, year, sep=""),
 		year=year-2005) %>%
 	ungroup() %>%	

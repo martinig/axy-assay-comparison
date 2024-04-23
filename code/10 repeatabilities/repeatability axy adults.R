@@ -2,7 +2,7 @@
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (e.g., A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
 #original code by A. R. Martinig
-#last edited April 21, 2024 by A. R. Martinig
+#last edited April 23, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 #start-up code.R
@@ -17,6 +17,7 @@ adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy
   left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id") %>% #to bring in the grid information
   filter(axy_ageclass=="A") %>% 
   mutate(
+  		grid=ifelse(grid=="SUX", "SU", grid),
 		grid_yr=paste(grid, axy_yr, sep=""),
 		axy_yr=axy_yr-2014) %>%
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects    
@@ -44,7 +45,7 @@ nrow(adult_axy_all) #29144 records
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all, control = lmerControl(optimizer ="Nelder_Mead"))
 summary(m1a)
 
 plot(m1a) 
