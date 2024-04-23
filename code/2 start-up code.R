@@ -1,6 +1,6 @@
 #all the data cleaning is here 
 #original code by A. R. Martinig
-#last edited on April 18, 2024 by A. R. Martinig 
+#last edited on April 21, 2024 by A. R. Martinig 
 
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror
 

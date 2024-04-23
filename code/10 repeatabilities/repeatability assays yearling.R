@@ -1,6 +1,6 @@
 #repeatability estimates for yearling squirrels for the assay complete dataset
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 21, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -12,7 +12,8 @@
 yearling_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="Y") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),
-		year=year-2005)%>%
+		grid_yr=paste(grid, year, sep=""),
+		year=year-2005) %>%
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects 
 	mutate(b.assay.local.density= mean(assay.local.density),		
 		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%
@@ -38,7 +39,7 @@ nrow(yearling_assay_all) #257
 #non-adjusted repeatability
 #############################
 
-m3a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m3a<-lmer(OFT1 ~ (1|squirrel_id) + (1| grid_yr), data= yearling_assay_all)
 summary(m3a)
 
 plot(m3a) 
@@ -75,7 +76,7 @@ coda::HPDinterval(rID)
 #adjusted repeatability
 #############################
 
-m3b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m3b<-lmer(OFT1 ~ trialnumber +  sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| grid_yr), data= yearling_assay_all)
 summary(m3b)
 
 plot(m3b)
@@ -116,7 +117,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1| grid_yr), data= yearling_assay_all)
 summary(m4a)
 
 plot(m4a) 
@@ -153,7 +154,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m4b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data= yearling_assay_all)
+m4b<-lmer(OFT2 ~ trialnumber +  sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| grid_yr), data= yearling_assay_all)
 summary(m4b)
 
 plot(m4b) 

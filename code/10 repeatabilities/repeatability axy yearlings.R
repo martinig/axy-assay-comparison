@@ -2,7 +2,7 @@
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 21, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -16,7 +16,9 @@
 yearling_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%
   left_join((tbl(con, "flastall2") %>% select(squirrel_id, grid=gr) %>% collect()), by="squirrel_id") %>% #to bring in the grid information
   filter(axy_ageclass=="Y") %>% 
-  mutate(axy_yr=axy_yr-2014)%>%
+  mutate(
+		grid_yr=paste(grid, axy_yr, sep=""),
+		axy_yr=axy_yr-2014) %>%
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects    
 	mutate(b.axy.local.density=mean(axy.local.density),
 		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%
@@ -41,7 +43,7 @@ nrow(yearling_axy_all) #9136 records
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all)
 summary(m1a)
 
 plot(m1a)
@@ -78,7 +80,7 @@ coda::HPDinterval(rID)
 #adjusted repeatability
 #############################
 
-m1b<-lmer(PC1 ~ grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m1b<-lmer(PC1 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all)
 summary(m1b)
 
 plot(m1b)
@@ -119,7 +121,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all)
 summary(m2a)
 
 plot(m2a)
@@ -156,7 +158,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~  grid + sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr) + (1|tod), data=yearling_axy_all)
+m2b<-lmer(PC2 ~   sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all)
 summary(m2b)
 
 plot(m2b)

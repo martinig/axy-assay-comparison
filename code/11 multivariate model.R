@@ -1,7 +1,7 @@
 #multivariate models for assay and axy principal components (PC1, PC2, no PC3 at this time)
 #global dataset 
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 20, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -53,7 +53,9 @@ head(merged)
 
  
 final_MCMC<-merged%>% 
-  	mutate(date=yday(trialdate), #converts dates to days since Jan 1st!
+  	mutate(
+  		  grid_yr=paste(grid, year, sep=""),
+  		date=yday(trialdate), #converts dates to days since Jan 1st!
          age2=age^2,
          local.density=assay.local.density,
          avg_fam =assay_avg_fam) %>% #make a quadratic age variable

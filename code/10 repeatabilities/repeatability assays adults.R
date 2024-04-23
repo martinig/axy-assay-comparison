@@ -1,6 +1,6 @@
 #repeatability estimates for adult squirrels for the assay complete dataset
 #original code by A. R. Martinig
-#last edited April 16, 2024 by A. R. Martinig
+#last edited April 21, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 #start-up code.R
@@ -11,6 +11,7 @@
 adult_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="A") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),
+		grid_yr=paste(grid, year, sep=""),
 		year=year-2005) %>%
 	ungroup() %>%	
 	group_by(squirrel_id) %>% #convert these variables to among-ind effects 
@@ -40,7 +41,7 @@ nrow(adult_assay_all) #484
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(OFT1 ~ (1|squirrel_id) + (1| year), data=adult_assay_all)
+m1a<-lmer(OFT1 ~ (1|squirrel_id) + (1| grid_yr), data=adult_assay_all)
 summary(m1a)
 
 plot(m1a) 
@@ -79,7 +80,7 @@ coda::HPDinterval(rID)
 #adjusted repeatability
 #############################
 
-m1b<-lmer(OFT1 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data=adult_assay_all)
+m1b<-lmer(OFT1 ~ trialnumber + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1|grid_yr), data=adult_assay_all)
 summary(m1b)
 
 plot(m1b) 
@@ -121,7 +122,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m2a<-lmer(OFT2 ~ (1|squirrel_id) + (1| year), data= adult_assay_all)
+m2a<-lmer(OFT2 ~ (1|squirrel_id) + (1|grid_yr), data= adult_assay_all)
 summary(m2a)
 
 plot(m2a) 
@@ -159,7 +160,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(OFT2 ~ trialnumber + grid + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| year), data=adult_assay_all)
+m2b<-lmer(OFT2 ~ trialnumber + sex + b.assay.local.density + b.assay_avg_fam + (1|squirrel_id) + (1| grid_yr), data=adult_assay_all)
 summary(m2b)
 
 plot(m2b) 
