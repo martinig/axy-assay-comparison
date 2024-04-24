@@ -39,8 +39,8 @@ ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, 
   		name = "Subset") + 
 	scale_shape_manual(
       	values=c(16, 17), 
-      	labels=c("PC1" = "Foraging", 
-      		"PC2" = "Movement"), 
+      	labels=c("PC1" = "Axis 1", 
+      		"PC2" = "Axis 2"), 
       	name = "Accelerometer behaviour") +	
   	coord_cartesian(ylim=c(0, 0.25), clip="off")+ #set the range
   	guides(

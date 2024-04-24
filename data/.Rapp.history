@@ -9,7 +9,7 @@ rm(list=ls(all=T))#
 setwd("~/Documents/Files/Post-docs/UofC/Jonas (ECOL 530)/axy-assay-comparison/data")
 #all the data cleaning is here #
 #original code by A. R. Martinig#
-#last edited on April 21, 2024 by A. R. Martinig #
+#last edited on April 24, 2024 by A. R. Martinig #
 #
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
 #
@@ -249,119 +249,7 @@ theme_squirrel_dot <- #
         text = element_text(size = 10))
 #all the data cleaning is here #
 #original code by A. R. Martinig#
-#last edited on April 21, 2024 by A. R. Martinig #
-#
-options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
-#
-#load libraries#
-pacman::p_load(#
-				ggplot2, #
-				ggstatsplot,#
-               dplyr, #
-               lubridate, #
-               tidyverse,   #
-               broom,  #
-               FSA,      #
-               glmmTMB,  #
-               lme4,   #
-               tidyr,      #
-               DescTools,#
-               scales,#
-               ggpubr,#
-               grid,#
-               lattice,#
-               sjPlot,#
-               sjlabelled,#
-               sjmisc,#
-               cowplot, #
-               broom.mixed,#
-               ggforce, #
-               gridGraphics,#
-               ggeffects,#
-               magrittr,#
-               MCMCglmm,#
-               data.table,#
-               lattice,#
-               stats,#
-               cowplot,#
-               krsp#
-)#
-select<-dplyr::select#
-filter<-dplyr::filter#
-###############################
-#  importing  data and formatting it  ##
-###############################
-#########################################
-#raw behavioural assays#
-#########################################
-#
-#cleaning the assay datast we will be using#
-#
-assays<-read.csv("raw assays.csv", header=T) %>%#
-	group_by(sq_id) %>%#
-	mutate(trialdate=ymd(trialdate)) %>%#
-	arrange(trialdate) %>%#
-	mutate(trialnumber=row_number())%>%#
-	ungroup() %>%#
-#converting the raw scores#
-	mutate(#
-		ageclass=ifelse(age==0, "J", #
-			ifelse(age==1, "Y", #
-			ifelse(age>1, "A",  ageclass))),#
-		squirrel_id=sq_id,#
-		age=as.numeric(age),#
-		walk=(walk/450), #
-		jump=(jump/450), #
-		hole=(hole/450), #
-		hang=(hang/450), #
-		chew=(chew/450), #
-		groom=(groom/450), #
-		still=(still/450),#
-		front=(front/300), #
-		back=(back/300), #
-		attack=(attack/300), #
-		attacklatency=(attacklatency/300), #
-		approachlatency=(approachlatency/300)) %>%#
-	filter(#
-		!squirrel_id== 23686, #missing sex ID#
-		!ageclass=="J", #excluding because we don't have this for axys#
-		!is.na(squirrel_id), #
-		!observer %in% c("SWK"), #
-		is.na(hang) | hang<=1, #
-		is.na(chew) | chew<=1, #
-		is.na(still) | still<=1, #
-		is.na(front) | front<=1, #
-		is.na(back) | back<=1, #
-		is.na(attack) | attack<=0.96, #attack is set to 0.96 because numerous squirrels have 288-294 attacks, which are impossible to get in 300 seconds #
-		#only excludes 2 squirrels - the first (10265) had 294 attacks and a jump rate that was an outlier AND had decimals (which is impossible for a count behaviour!) and the second (10342) had 288 attacks#
-		#this leaves squirrels with <=252 attacks (which is still high)#
-		is.na(attacklatency) | attacklatency<=1, #
-		is.na(approachlatency) | approachlatency<=1,#
-		!is.na(walk)) %>% #
-	select(-c(X, sq_id, observer.software,  collar, Exclude_unless_video_reanalyzed, Exclude_reason, Proceed_with_caution, Proceed_with_caution_reason, Last_Edited, Comments, oft_duration, mis_duration, na.rm, colours, midden, taglft, tagrt, front, back, attack, attacklatency, approachlatency)) %>%#
-	droplevels()#
-summary(assays)#
-head(assays)#
-#
-(assays) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #543 individuals#
-nrow(assays) #741#
-#
-table(assays$sex, assays$ageclass)#
-table(assays$observer)#
-#
-#########################################
-#bare minimum needed for axy data subsets#
-#########################################
-#
-birth<-read.csv ("fitness.csv") %>%#
-	select(c(squirrel_id, sex, byear, dyear, litter_id)) %>%#
-	mutate(sex=ifelse(squirrel_id %in% c(21128, 21348), "F",#
-		ifelse(squirrel_id %in% c(19890, 23326, 23210), "M", as.character(sex)))) %>%#
-	group_by(squirrel_id) %>%#
-	filter(row_number()==1)#
-#
-summary(birth)#
-head(birth)#
+#last edited on April 24, 2024 by A. R. Martinig #
 #
 #########################################
 #raw axy data before cleaning#
@@ -487,486 +375,91 @@ theme_squirrel_dot <- #
         panel.border = element_blank(),#
         panel.background = element_blank(),#
         text = element_text(size = 10))
-p1<-ggstatsplot::ggcorrmat(#
-  assays,#
-  cor.vars = c(walk, jump, hole, hang, chew, groom, still),#
-  cor.vars.names = c("Walk", "Jump", "Hole", "Hang", "Chew/Scratch", "Self-grooming", "Still"),#
-  output = "plot",#
-  matrix.type = "lower",#
-  type = "pearson",#
-  beta = 0.1,#
-  k = 2,#
-  sig.level = 0.05,#
-  conf.level = 0.95,#
-  nboot = 1000,#
-  pch= "",#
-  colors = c("black", "white", "black"),#
-    ggcorrplot.args = list(#
-    lab_size = 2) #makes the numbers in the boxes smaller#
-)+ #
-  scale_y_discrete(position = "right")+#
-  theme_bw() +#
-  labs(y="", x="") +#
-  theme(axis.line = element_line(colour = "black"),#
-        panel.grid.major = element_blank(),#
-        panel.grid.minor = element_blank(),#
-        panel.border = element_blank(),#
-        panel.background = element_blank(),#
-        axis.text=element_text(size = 11), #changes size of axes #s#
-        axis.text.x=element_text(angle = 90),#
-        axis.title=element_text(size= 0), #changes size of axes labels#
-        text = element_text(size = 15),#
-        legend.position = c(0.15,0.8), #move legend into plot#
-        legend.title=element_blank())#
-p2<-ggstatsplot::ggcorrmat(#
-  axy,#
-  cor.vars = c(feed, forage, nestmove, nestnotmove, notmoving, travel),#
-  cor.vars.names = c("Feed", "Forage", "Nest Moving", "Nest Not Moving", "Not Moving", "Travel"),#
-  output = "plot",#
-  matrix.type = "lower",#
-  type = "pearson",#
-  beta = 0.1,#
-  k = 2,#
-  sig.level = 0.05,#
-  conf.level = 0.95,#
-  nboot = 1000,#
-  pch= "",#
-  colors = c("black", "white", "black"),#
-  ggcorrplot.args = list(#
-    lab_size = 2) #makes the numbers in the boxes smaller#
-)+ #
-  scale_y_discrete(position = "right")+#
-  theme_bw() +#
-  labs(y="", x="") +#
-  theme(axis.line = element_line(colour = "black"),#
-        panel.grid.major = element_blank(),#
-        panel.grid.minor = element_blank(),#
-        panel.border = element_blank(),#
-        panel.background = element_blank(),#
-        axis.text=element_text(size = 11), #changes size of axes #s#
-        axis.text.x=element_text(angle = 90),#
-        axis.title=element_text(size= 0), #changes size of axes labels#
-        text = element_text(size = 15),#
-        legend.position = c(0.15,0.8), #move legend into plot#
-        legend.title=element_blank())        #
-#Combine robust plots#
-	 prow <- cowplot::plot_grid( #
-	 				   p1 + theme(legend.position="none"),#
-	                   p2 + theme(legend.position="none"),#
-	                   align = 'vh',#
-	                   labels = c("(a)", "(b)"), label_size=10,#
-	                   hjust = -0.5,#
-	                   vjust=5,#
-	                   nrow = 1,#
-	                   ncol=2)#
-	legend_b <- cowplot::get_legend(p1 + theme(legend.position="bottom")) #extract the legend from one of the plots #
-cowplot::plot_grid(prow, NULL, legend_b, ncol = 1,nrow=3, rel_heights = c(1,-0.2,0.5))
-ggstatsplot::ggcorrmat(#
-  axy,#
-  cor.vars = c(feed, forage, nestmove, nestnotmove, notmoving, travel),#
-  cor.vars.names = c("Feed", "Forage", "Nest Moving", "Nest Not Moving", "Not Moving", "Travel"),#
-  output = "plot",#
-  matrix.type = "lower",#
-  type = "pearson",#
-  beta = 0.1,#
-  k = 2,#
-  sig.level = 0.05,#
-  conf.level = 0.95,#
-  nboot = 1000,#
-  pch= "",#
-  colors = c("black", "white", "black"),#
-  ggcorrplot.args = list(#
-    lab_size = 2) #makes the numbers in the boxes smaller#
-)+ #
-  scale_y_discrete(position = "right")+#
-  theme_bw() +#
-  labs(y="", x="") +#
-  theme(axis.line = element_line(colour = "black"),#
-        panel.grid.major = element_blank(),#
-        panel.grid.minor = element_blank(),#
-        panel.border = element_blank(),#
-        panel.background = element_blank(),#
-        axis.text=element_text(size = 11), #changes size of axes #s#
-        axis.text.x=element_text(angle = 90),#
-        axis.title=element_text(size= 0), #changes size of axes labels#
-        text = element_text(size = 15),#
-        legend.position = c(0.15,0.8), #move legend into plot#
-        legend.title=element_blank())
-#Combine robust plots#
-	 prow <- cowplot::plot_grid( #
-	 				   p1 + theme(legend.position="none"),#
-	                   p2 + theme(legend.position="none"),#
-	                   align = 'vh',#
-	                   labels = c("(a)", "(b)"), label_size=10,#
-	                   hjust = -0.5,#
-	                   vjust=5,#
-	                   nrow = 1,#
-	                   ncol=2)
-legend_b <- cowplot::get_legend(p1 + theme(legend.position="bottom")) #extract the legend from one of the plots
-cowplot::plot_grid(prow, NULL, legend_b, ncol = 1,nrow=3, rel_heights = c(1,-0.2,0.5))
-axy2<- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
-  group_by(axy_id)%>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%#
-  select(-c(videodate, trialtime)) %>%#
-  ungroup()
-(axy2) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #67 individuals
-nrow(axy2) #8678
-head(axy2)
-head(axy2)
-merged_data<- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
-  group_by(axy_id)%>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%#
-  select(-c(videodate, trialtime)) %>%#
-  ungroup()
-attach(merged_data);tt=cbind(walk,   jump,   hole,  hang, chew,  groom,  still, feed, forage, nestmove, nestnotmove, notmoving, travel)#
-cor(tt)
-head(combine)
-combine <- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
-  group_by(axy_id)%>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%#
-  select(-c(videodate, trialtime)) %>%#
-  ungroup()#
+# run start up code, focal data subsets #
+Start-up code.R#
 #
-head(combine)
-combine <- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
-  group_by(axy_id)%>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%#
-  select(-c(videodate, trialtime, axy_yr, axy_month, axy_date, tod, byear, dyear, litter_id)) %>%#
-  ungroup()
-head(combine)
-combine <- dplyr::inner_join(assays, axy1, by=c("squirrel_id", "sex")) %>%#
-  group_by(axy_id)%>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%#
-  select(-c(videodate, trialtime, axy_yr, axy_month, axy_date, tod, byear, dyear, litter_id, prop_feeding, prop_foraging, prop_nestmoving, prop_nestnotmoving, prop_notmoving, prop_travel)) %>%#
-  ungroup()#
+rep<-read.csv("axy_comparison_repeatability_data.csv", header=T) %>%#
+	mutate(subset=as.factor(subset),#
+		behaviour=as.factor(Behaviour), #
+		age=as.factor(age),#
+		rep_type =as.factor(rep_type))#
 #
-head(combine)
-combine <- axy1 %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed))
-head(combine)
-combine <- axy1 %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed2=sum(feed))
-head(combine)
-combine <- axy1 %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel))
-head(combine)
-combine <- axy1 %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel)) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel)) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=sum(feed+forage)) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(total_feeding/total_obs),#
-         prop_foraging=(total_foraging/total_obs),#
-         prop_nestmoving =(total_nestmoving/total_obs),#
-         prop_nestnotmoving =(total_nestnotmoving/total_obs),#
-         prop_notmoving =(total_notmoving/total_obs),#
-         prop_travel=(total_travel/total_obs))
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(total_feeding/total),#
-         prop_foraging=(total_foraging/total),#
-         prop_nestmoving =(total_nestmoving/total),#
-         prop_nestnotmoving =(total_nestnotmoving/total),#
-         prop_notmoving =(total_notmoving/total),#
-         prop_travel=(total_travel/total))
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total))
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- inner_join(assays, by=c("squirrel_id", "sex"))
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- inner_join(assays, by=c("squirrel_id"))
-(combine) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #61 individuals
-nrow(combine) #8386
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id")) %>%#
- select(-c(videodate, trialtime, axy_yr, axy_month, axy_date, tod, byear, dyear, litter_id))
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup()
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id"))
-head(combine)
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id")) %>%#
- select(-c(tod, feed, forage, nestmove, nestnotmove, notmoving, travel, total, axy_id, observer, ageclass, sex, age, grid))#
+summary(rep)#
+head(rep)#
+str(rep)#
 #
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_date) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id")) %>%#
- select(-c(tod, feed, forage, nestmove, nestnotmove, notmoving, travel, total, axy_id, observer, ageclass, sex, age, grid, videodate, trialtime))#
+#colour blind friendly palatte #c("#000000", "#E69F00" orangish, "#56B4E9" light blue, "#009E73" #green, "#F0E442" yellow, "#0072B2" blue, "#D55E00" orange, "#CC79A7" pink)#
 #
-head(combine)
-combine <- axy %>%#
-	group_by(squirrel_id, axy_yr, axy_month) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id")) %>%#
- select(-c(tod, feed, forage, nestmove, nestnotmove, notmoving, travel, axy_id, observer, ageclass, sex, age, grid, videodate, trialtime))#
+pd <- position_dodge(0.5)
+pd <- position_dodge(0.25)#
 #
-head(combine)
-(combine) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #61 individuals
-nrow(combine) #2409
-length(unique(combine $squirrel_id)) #146
-length(unique(combine $squirrel_id), unique(combine $axy_date)) #146
-length( unique(combine $axy_date)) #146
-length( unique(combine $trial_date)) #95
-length( unique(combine $trialdate)) #95
-combine <- axy %>%#
-	group_by(squirrel_id, axy_yr, axy_month) %>%#
-	mutate(feed=sum(feed),#
-		forage =sum(forage),#
-		nestmove =sum(nestmove),#
-		nestnotmove =sum(nestnotmove),#
-		notmoving =sum(notmoving),#
-		travel =sum(travel),#
-		total=feed+forage+nestmove+nestnotmove+notmoving+travel) %>%#
-  filter(row_number()==1) %>%#
-  droplevels()%>%	#
-  mutate(prop_feeding=(feed/total),#
-         prop_foraging=(forage/total),#
-         prop_nestmoving =(nestmove/total),#
-         prop_nestnotmoving =(nestnotmove/total),#
-         prop_notmoving =(notmoving/total),#
-         prop_travel=(travel/total)) %>%#
- ungroup() %>%        #
- inner_join(assays, by=c("squirrel_id")) %>%#
- select(-c(tod, feed, forage, nestmove, nestnotmove, notmoving, travel, axy_id, observer, ageclass, sex, age, grid, videodate, trialtime, total))#
+ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, linetype = rep_type)) + #
+  	geom_point(position = position_dodge(width = 0.25), size = 5) + #
+   	geom_errorbar(aes(ymin=LCI, ymax=UCI), position=pd, width=0.1, size=0.5)+ #
+  	scale_x_discrete(#
+  		limits=c("Y", "A"),#
+  		labels=c("Y" = "Yearling", "A" = "Adult")) +#
+  	scale_linetype_manual(#
+  		values=c("solid", "dashed"), #
+  		labels=c("non_adjusted" = "Non-adjusted", #
+  			"adjusted" = "Adjusted"), #
+  		name = "Repeatability type") +#
+  	scale_colour_manual(#
+   		breaks=c("all","consecutive", "random"),#
+  		values = c("#D55E00", "#0072B2", "black"), #
+  		labels=c("all" = "All the data", #
+  			"consecutive" = "Consecutive sampling", #
+  			"random"="Random sampling"),#
+  		name = "Subset") + #
+	scale_shape_manual(#
+      	values=c(16, 17), #
+      	labels=c("PC1" = "Axis 1", #
+      		"PC2" = "Axis 2"), #
+      	name = "Accelerometer behaviour") +	#
+  	coord_cartesian(ylim=c(0, 0.25), clip="off")+ #set the range#
+  	guides(#
+  	#keyheight changes space btw rows, order changes order of multiple legend items#
+  		linetype = guide_legend(keyheight=2, order=2), #
+  		colour = guide_legend(keyheight=2, order=3), #
+  		shape = guide_legend(keyheight=1.2, order=1)) +    #
+  	theme_squirrel +#
+  	theme(legend.text.align = 0, #also needed to help left-justify legend#
+        legend.key.size = unit(3, 'lines'),#
+        plot.caption = element_text(hjust = 0, vjust = 2.12)) +#
+  	labs(y = "Repeatability ± 95 % CrI", x = "Life stage")
+pd <- position_dodge(0.5)#
 #
-head(combine)
-(combine) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #61 individuals
-nrow(combine) #195
-length(unique(combine $trialdate)) #50
-attach(combine);tt=cbind(walk,   jump,   hole,  hang, chew,  groom,  still, prop_feeding, prop_foraging, prop_nestmoving, prop_nestnotmoving, prop_notmoving, prop_travel)
-Hmisc::rcorr(tt, type="pearson")
+ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, linetype = rep_type)) + #
+  	geom_point(position = position_dodge(width = 0.5), size = 5) + #
+   	geom_errorbar(aes(ymin=LCI, ymax=UCI), position=pd, width=0.1, size=0.5)+ #
+  	scale_x_discrete(#
+  		limits=c("Y", "A"),#
+  		labels=c("Y" = "Yearling", "A" = "Adult")) +#
+  	scale_linetype_manual(#
+  		values=c("solid", "dashed"), #
+  		labels=c("non_adjusted" = "Non-adjusted", #
+  			"adjusted" = "Adjusted"), #
+  		name = "Repeatability type") +#
+  	scale_colour_manual(#
+   		breaks=c("all","consecutive", "random"),#
+  		values = c("#D55E00", "#0072B2", "black"), #
+  		labels=c("all" = "All the data", #
+  			"consecutive" = "Consecutive sampling", #
+  			"random"="Random sampling"),#
+  		name = "Subset") + #
+	scale_shape_manual(#
+      	values=c(16, 17), #
+      	labels=c("PC1" = "Axis 1", #
+      		"PC2" = "Axis 2"), #
+      	name = "Accelerometer behaviour") +	#
+  	coord_cartesian(ylim=c(0, 0.25), clip="off")+ #set the range#
+  	guides(#
+  	#keyheight changes space btw rows, order changes order of multiple legend items#
+  		linetype = guide_legend(keyheight=2, order=2), #
+  		colour = guide_legend(keyheight=2, order=3), #
+  		shape = guide_legend(keyheight=1.2, order=1)) +    #
+  	theme_squirrel +#
+  	theme(legend.text.align = 0, #also needed to help left-justify legend#
+        legend.key.size = unit(3, 'lines'),#
+        plot.caption = element_text(hjust = 0, vjust = 2.12)) +#
+  	labs(y = "Repeatability ± 95 % CrI", x = "Life stage")
