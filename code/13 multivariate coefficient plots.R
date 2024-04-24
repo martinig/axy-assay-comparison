@@ -1,6 +1,6 @@
 #code to make the coefficient plots from the multivariate models for assay and axy principal components (PC1, PC2)
 #original code by A. R. Martinig
-#last edited April 23, 2024 by A. R. Martinig
+#last edited April 24, 2024 by A. R. Martinig
 
 
 #response variables
@@ -102,18 +102,18 @@ subject <- c("traitOFT1:sexM",
 				"traitOFT2:age2", 
 				"traitPC1:age2",
 				"traitPC2:age2", 
-					"traitOFT1:local.density", 
-					"traitOFT2:local.density", 
-					"traitPC1:local.density",
-					"traitPC2:local.density",  
+					"traitOFT1:date", 
+					"traitOFT2:date", 
+					"traitPC1:date",
+					"traitPC2:date",
+				"traitOFT1:local.density", 
+				"traitOFT2:local.density", 
+				"traitPC1:local.density",
+				"traitPC2:local.density",  
 		"traitOFT1:avg_fam", 
 		"traitOFT2:avg_fam", 
 		"traitPC1:avg_fam",
-		"traitPC2:avg_fam",  		
-				"traitOFT1:date", 
-				"traitOFT2:date", 
-				"traitPC1:date",
-				"traitPC2:date")
+		"traitPC2:avg_fam")
 
 
 dat <- data.frame(latent.mean, latent.lower, latent.upper, subject)
@@ -126,9 +126,9 @@ plot.dat$subject2 <- reorder(plot.dat$subject, plot.dat$latent.mean)
 
 
 #OFT1 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:date", "traitOFT1:local.density", "traitOFT1:avg_fam"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:date", "traitOFT1:local.density", "traitOFT1:avg_fam"))
 
 C<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -139,10 +139,10 @@ C<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") + 
-	scale_x_continuous(breaks = c(-1, 0, 1, 2, 3), position="top", limits = c(-1, 3), expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1), position="top", limits = c(-1, 1), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitOFT1:sexM",  "traitOFT1:age", "traitOFT1:age2", "traitOFT1:local.density", "traitOFT1:avg_fam", "traitOFT1:date"),
-	labels = c("Sex", "Age",expression("Age"^2),  "Local density", "Social familiarity", "Day of year")) +
+		limits=rev,
+		labels = c("traitOFT1:sexM"="Sex", "traitOFT1:age"="Age", "traitOFT1:age2"=expression("Age"^2),   "traitOFT1:date"="Day of year", "traitOFT1:local.density"="Local density",  "traitOFT1:avg_fam"="Social familiarity")) +
 	xlab("Activity") + 
 	ylab("") +
 	theme_squirrel_dot 
@@ -150,9 +150,9 @@ C
 
 
 #OFT2 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:date", "traitOFT2:local.density", "traitOFT2:avg_fam"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT2:sexM",  "traitOFT2:age",  "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitOFT2:sexM",  "traitOFT2:age",  "traitOFT2:age2", "traitOFT2:date", "traitOFT2:local.density", "traitOFT2:avg_fam"))
 
 D<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -163,20 +163,21 @@ D<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +	
 	geom_point(shape=16,cex=2, color="black") + 
-	scale_x_continuous(breaks = c(-1, 0,1.0, 2), position="top", limits = c(-1.05, 2), expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-0.5, -0.25, 0, 0.25, 0.5), position="top", limits = c(-0.5, 0.54), expand = c(0,0)) +
 	scale_y_discrete(
-	breaks = c("traitOFT2:sexM",  "traitOFT2:age", "traitOFT2:age2", "traitOFT2:local.density", "traitOFT2:avg_fam", "traitOFT2:date"),
-	labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity",  "Day of year")) +
+		limits=rev,
+		labels = c("traitOFT2:sexM"="Sex", "traitOFT2:age"="Age", "traitOFT2:age2"=expression("Age"^2),   "traitOFT2:date"="Day of year", "traitOFT2:local.density"="Local density",  "traitOFT2:avg_fam"="Social familiarity")) +
 	xlab("Exploration") + 
 	ylab("") +
 	theme_squirrel_dot 
 D
 
 
-#PC1 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age",  "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"))
+#PC1 plot only
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC1:sexM",  "traitPC1:age",  "traitPC1:age2", "traitPC1:date", "traitPC1:local.density", "traitPC1:avg_fam"))
+
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:date", "traitPC1:local.density", "traitPC1:avg_fam"))
 
 E<-ggplot(plot.dat2,  
 	aes(x = latent.mean, y = subject2)) + 
@@ -187,10 +188,10 @@ E<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") + 
-	scale_x_continuous(breaks = c(-2, -1, 0, 1), position="top", limits = c(-2, 1.1), expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-0.5, -0.25, 0, 0.25, 0.5), position="top", limits = c(-0.5, 0.5), expand = c(0,0)) +
 	scale_y_discrete(
-		breaks = c("traitPC1:sexM",  "traitPC1:age", "traitPC1:age2", "traitPC1:local.density", "traitPC1:avg_fam", "traitPC1:date"),
-		labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity",  "Day of year")) +
+		limits=rev,
+		labels = c("traitPC1:sexM"="Sex", "traitPC1:age"="Age", "traitPC1:age2"=expression("Age"^2),   "traitPC1:date"="Day of year", "traitPC1:local.density"="Local density",  "traitPC1:avg_fam"="Social familiarity")) +
 	xlab("Foraging") + 
 	ylab("") +
 	theme_squirrel_dot 
@@ -198,9 +199,9 @@ E
 
 
 #PC2 plot only
-plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
+plot.dat2<-plot.dat%>%filter(subject %in% c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:date", "traitPC2:local.density", "traitPC2:avg_fam"))
 
-plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"))
+plot.dat2$subject2 <- factor(plot.dat2$subject2, levels=c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:date", "traitPC2:local.density", "traitPC2:avg_fam"))
 
 F<-ggplot(plot.dat2, 
 	aes(x = latent.mean, y = subject2)) + 
@@ -211,10 +212,10 @@ F<-ggplot(plot.dat2,
 		y = subject2, 
 		yend = subject2), size=0.3) +
 	geom_point(shape=16,cex=2, color="black") +  
-	scale_x_continuous(breaks = c(-1, 0, 1, 2), position="top", limits = c(-1, 2), expand = c(0,0)) +
+	scale_x_continuous(breaks = c(-0.25, -0.13, 0, 0.13, 0.25), position="top", limits = c(-0.25, 0.25), expand = c(0,0)) +
 	scale_y_discrete(
-		breaks = c("traitPC2:sexM",  "traitPC2:age", "traitPC2:age2", "traitPC2:local.density", "traitPC2:avg_fam", "traitPC2:date"),
-		labels = c("Sex", "Age", expression("Age"^2),  "Local density", "Social familiarity", "Day of year")) +
+		limits=rev,
+		labels = c("traitPC2:sexM"="Sex", "traitPC2:age"="Age", "traitPC2:age2"=expression("Age"^2),   "traitPC2:date"="Day of year", "traitPC2:local.density"="Local density",  "traitPC2:avg_fam"="Social familiarity")) +
 	xlab("Movement") + 
 	ylab("") +
 	theme_squirrel_dot 
