@@ -1,15 +1,17 @@
+#random seven minute sampling
+
 #repeatabilities for axy1 file, adults only
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (e.g., A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
 #original code by A. R. Martinig
-#last edited April 23, 2024 by A. R. Martinig
+#last edited April 24, 2024 by A. R. Martinig
 
 #run the following prior to running script:
-#start-up code.R
-#axy data subsets.R
-#PCA generation code - axy.R
-#local density (global datasets).R
-#familiarity axy (global datasets).R
+start-up code.R
+axy data subsets.R
+PCA generation code - axy.R
+local density (global datasets).R
+familiarity axy (global datasets).R
 
 
 #create working dataframe
@@ -25,16 +27,19 @@ adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy
 		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%
 	ungroup()
 	
-	
 summary(adult_axy_all)
 
-(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #259 adults
-(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #7334 deployment days
-nrow(adult_axy_all) #29144 records
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days
+nrow(adult_axy_all) #4570 records
+
+table(adult_axy_all$grid_yr) #28 levels
+table(adult_axy_all$axy_yr) #9 levels
+table(adult_axy_all$grid) #6 levels
 
 #########################################
 #############       Adults         ##############
-#############      n = 259         ##############
+#############      n = 177         ##############
 #########################################
 
 #############################
@@ -45,7 +50,7 @@ nrow(adult_axy_all) #29144 records
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all, control = lmerControl(optimizer ="Nelder_Mead"))
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
 summary(m1a)
 
 plot(m1a) 
@@ -81,7 +86,7 @@ coda::HPDinterval(rID)
 #adjusted repeatability
 #############################
 
-m1b<-lmer(PC1 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
+m1b<-lmer(PC1 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
 summary(m1b)
 
 plot(m1b)
@@ -123,7 +128,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
 summary(m2a)
 
 plot(m2a) 
@@ -159,7 +164,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
+m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
 summary(m2b)
 
 plot(m2b)
