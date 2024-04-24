@@ -98,7 +98,7 @@ cowplot::plot_grid(prow, NULL, legend_b, ncol = 1,nrow=3, rel_heights = c(1,-0.2
 ########################################
 
 combine <- axy %>%
-	group_by(squirrel_id, axy_yr, axy_month) %>%
+	group_by(squirrel_id, axy_date) %>%
 	mutate(feed=sum(feed),
 		forage =sum(forage),
 		nestmove =sum(nestmove),
@@ -125,9 +125,9 @@ head(combine)
 ########################################
 
 (combine) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #61 individuals
-nrow(combine) #195
+nrow(combine) #2409
 
-length(unique(combine $axy_date)) #95
+length(unique(combine $axy_date)) #741
 length(unique(combine $trialdate)) #50
 
 
