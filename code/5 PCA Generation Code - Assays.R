@@ -1,6 +1,6 @@
 #PCA generation for OFT scores
 #original code by A. R. Martinig
-#last edited April 18, 2024 by A. R. Martinig
+#last edited May 1, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 #start-up code.R
@@ -37,7 +37,7 @@ assays$OFT2<-(-1)*prcomp(~walk +jump+ hole + hang +chew +groom + still, data= as
 OFT_only<-assays%>%select(squirrel_id, OFT1, OFT2, trialnumber)			
 
 personality_all<-assays%>% 
-	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, age, grid, trialnumber, trialdate)
+	select(squirrel_id, sex, OFT1, OFT2, observer, ageclass, cohort, year, assay_season, age, grid, trialnumber, trialdate)
 
 summary(personality_all)
 

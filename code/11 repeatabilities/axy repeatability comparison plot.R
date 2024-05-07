@@ -1,6 +1,6 @@
 #code to generate repeatability comparison plot for assays and axys
 #original code by A. R. Martinig
-#last edited April 24, 2024 by A. R. Martinig
+#last edited May 6, 2024 by A. R. Martinig
 
 # run start up code, focal data subsets 
 Start-up code.R
@@ -33,15 +33,15 @@ ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, 
   	scale_colour_manual(
    		breaks=c("all","consecutive", "random"),
   		values = c("#D55E00", "#0072B2", "black"), 
-  		labels=c("all" = "All the data", 
-  			"consecutive" = "Consecutive sampling", 
-  			"random"="Random sampling"),
+  		labels=c("all" = "Complete dataset", 
+  			"consecutive" = "Consecutive 7 minute subset", 
+  			"random"="Random 7 minute subset"),
   		name = "Subset") + 
 	scale_shape_manual(
       	values=c(16, 17), 
       	labels=c("PC1" = "Axis 1", 
       		"PC2" = "Axis 2"), 
-      	name = "Accelerometer behaviour") +	
+      	name = "Accelerometry behaviour") +	
   	coord_cartesian(ylim=c(0, 0.25), clip="off")+ #set the range
   	guides(
   	#keyheight changes space btw rows, order changes order of multiple legend items
