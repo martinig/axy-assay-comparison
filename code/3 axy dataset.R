@@ -1,6 +1,7 @@
 #all the data cleaning is here 
 #original code by A. R. Martinig
-#last edited on April 24, 2024 by A. R. Martinig 
+#last edited on May 1, 2024 by A. R. Martinig 
+
 
 ########################################
 #raw axy data before cleaning
@@ -11,16 +12,20 @@ axy<-read.csv("KRSP_sqr_axy_all_2014_2022_dailybyTOD.csv", header=T) %>%
 		axy_id=paste(id, date, tod, sep = "-"), 
 		axy_date=ymd(date),
 		axy_yr=year(date),
-		axy_month=month(date)) %>%
+		axy_month=month(date), 
+		axy_season=case_when(
+		 	axy_month %in% c(3, 4, 5)  ~ "spring",
+		 	axy_month %in% c(6, 7, 8) ~ "summer",
+		 	axy_month %in% c(9, 10)  ~ "autumn",
+      	.default = "winter")) %>%
 	filter(!is.na(id)) %>% #remove the rows with NA for squirrel_id
-	select(squirrel_id= id, axy_date, axy_yr, axy_month, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)
+	select(squirrel_id= id, axy_date, axy_yr, axy_month, axy_season, tod, feed=Feed, forage=Forage, nestmove=NestMove, nestnotmove=NestNotMove, notmoving=NotMoving, travel=Travel, total=Total, axy_id)
 
 head(axy)
 summary(axy)
 
 (axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #340 individuals
 nrow(axy) #38284
-
 
 
 ########################################
@@ -105,35 +110,3 @@ table(ads$sum, ads$sex)
 
 nrow(yrs)
 table(yrs$sum, yrs$sex)
-
-
-
-#conserved theme across plots for plots
-#general theme
-theme_squirrel <-
-	theme_bw() +
-	theme(axis.line = element_line(colour = "black"),
-        axis.text=element_text(size=15), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 15)) 
- 
-#dot-whisker plot theme       
-theme_squirrel_dot <- 
-	theme_bw() +
- 	theme(plot.margin = margin(0, 0.5, 0, 0, "cm"),
-		axis.line=element_line(),
-		axis.line.y=element_blank(),
-		axis.ticks.length=unit(0.4, "cm"),
-		axis.ticks.y=element_blank(),
-    	axis.text=element_text(size=10), #changes size of axes #s
-        axis.title=element_text(size=15), #changes size of axes labels
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(),
-        panel.border = element_blank(),
-        panel.background = element_blank(),
-        text = element_text(size = 10))      
-        

@@ -13,6 +13,7 @@ PCA generation code - axy.R
 local density (global datasets).R
 familiarity axy (global datasets).R
 
+write.csv(adult_axy_all, "/Users/april-martinig/Desktop/dataset_random.csv")
 
 #create working dataframe
 adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%

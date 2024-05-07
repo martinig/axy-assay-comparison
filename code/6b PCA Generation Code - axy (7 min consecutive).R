@@ -18,9 +18,8 @@ colnames(axy1)
 PCaxys1<-prcomp(axy1[c("prop_feeding", "prop_foraging", "prop_nestmoving", "prop_nestnotmoving", "prop_notmoving", "prop_travel")], center=TRUE, scale. =TRUE)
 summary(PCaxys1) 
 PCaxys1
-##PC1: feeding, foraging, -nestnotmoving, travel
-##PC2: nestnotmoving, -notmoving
-##PC3: nestmoveing, notmoving
+##PC1: -feeding, -foraging, nestnotmoving, -travel
+##PC2: notmoving
 
 #add PCs to dataset
 axy1$PC1<-(-1)*prcomp(~prop_feeding + prop_foraging + prop_nestmoving + prop_nestnotmoving +  prop_notmoving + prop_travel, data= axy1, center=TRUE, scale =TRUE)$x[,1]

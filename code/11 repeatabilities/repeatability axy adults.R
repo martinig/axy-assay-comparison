@@ -45,7 +45,7 @@ nrow(adult_axy_all) #29144 records
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all, control = lmerControl(optimizer ="Nelder_Mead"))
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
 summary(m1a)
 
 plot(m1a) 

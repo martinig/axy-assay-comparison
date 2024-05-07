@@ -1,0 +1,91 @@
+#working directory here#
+#original code by A. R. Martinig#
+#last edited May 7, 2024 by A. R. Martinig#
+#
+#Delete previous information stored #
+rm(list=ls(all=T))#
+#
+##set wd to the folder with all your csv's in it#
+setwd("~/Documents/Files/Post-docs/UofC/Jonas (ECOL 530)/axy-assay-comparison/for submission")
+options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
+#
+#load libraries#
+pacman::p_load(#
+				ggplot2, #
+				ggstatsplot,#
+               dplyr, #
+               lubridate, #
+               tidyverse,   #
+               broom,  #
+               FSA,      #
+               glmmTMB,  #
+               lme4,   #
+               tidyr,      #
+               DescTools,#
+               scales,#
+               ggpubr,#
+               grid,#
+               lattice,#
+               sjPlot,#
+               sjlabelled,#
+               sjmisc,#
+               cowplot, #
+               broom.mixed,#
+               ggforce, #
+               gridGraphics,#
+               ggeffects,#
+               magrittr,#
+               MCMCglmm,#
+               data.table,#
+               lattice,#
+               stats,#
+               cowplot,#
+               krsp#
+)#
+select<-dplyr::select#
+filter<-dplyr::filter#
+############################################
+#############           Assay             ##############
+#############      Full dataset         ##############
+############################################
+#
+###############################
+#  calculating repeatabilities  ##
+###############################
+#
+##########################################
+#############       Adults         ###############
+#############      n = 367         ###############
+##########################################
+#
+adult_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%#
+	filter(ageclass=="A") %>% #
+	mutate(trialnumber=as.numeric(trialnumber),#
+  		grid=ifelse(grid=="SUX", "SU", grid),#
+		grid_yr=paste(grid, year, sep=""),#
+		year=year-2005) %>%#
+	ungroup() %>%	#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
+	mutate(b.assay.local.density= mean(assay.local.density),		#
+		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+	ungroup()#
+summary(adult_assay_all)#
+#
+(adult_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #367 individuals#
+summary(adult_assay_all$trialnumber)#
+nrow(adult_assay_all) #484
+yearling_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%	filter(ageclass=="Y") %>% #
+	mutate(trialnumber=as.numeric(trialnumber),#
+  		grid=ifelse(grid=="SUX", "SU", grid),#
+		grid_yr=paste(grid, year, sep=""),#
+		year=year-2005) %>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
+	mutate(b.assay.local.density= mean(assay.local.density),		#
+		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+	ungroup()#
+#
+summary(yearling_assay_all)#
+#
+(yearling_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #209 individuals#
+summary(yearling_assay_all$trialnumber)#
+nrow(yearling_assay_all) #257

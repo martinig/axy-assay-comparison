@@ -8,6 +8,7 @@
 #local density (global datasets).R
 #familiarity assays (global datasets).R
 
+
 adult_assay_all<-left_join(personality_all, clean_assay, by=c("squirrel_id"="squirrel_id", "year"="year")) %>%
 	filter(ageclass=="A") %>% 
 	mutate(trialnumber=as.numeric(trialnumber),

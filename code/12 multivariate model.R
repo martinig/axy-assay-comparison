@@ -87,7 +87,7 @@ table(final_MCMC$grid)
 (final_MCMC) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #822 individuals
 nrow(final_MCMC) #39021
 
-#write.csv(final_MCMC, "/Users/april-martinig/Desktop/final_dataset.csv")
+#write.csv(merged, "/Users/april-martinig/Desktop/final_dataset.csv")
 
 #make sure variables aren't standardized before running this
 attach(final_MCMC);tt=cbind(year, age, age2, local.density, avg_fam, date)
