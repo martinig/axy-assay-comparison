@@ -32,7 +32,7 @@ ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, 
   		name = "Repeatability type") +
   	scale_colour_manual(
    		breaks=c("all","consecutive", "random"),
-  		values = c("#D55E00", "#0072B2", "black"), 
+  		values = c("black","#D55E00", "#0072B2"), 
   		labels=c("all" = "Complete dataset", 
   			"consecutive" = "Consecutive 7 minute subset", 
   			"random"="Random 7 minute subset"),
@@ -42,7 +42,7 @@ ggplot(rep, aes(x = age, y = Repeatability, shape = behaviour, colour = subset, 
       	labels=c("PC1" = "Axis 1", 
       		"PC2" = "Axis 2"), 
       	name = "Accelerometry behaviour") +	
-  	coord_cartesian(ylim=c(0, 0.25), clip="off")+ #set the range
+  	coord_cartesian(ylim=c(0, 0.35), clip="off")+ #set the range
   	guides(
   	#keyheight changes space btw rows, order changes order of multiple legend items
   		linetype = guide_legend(keyheight=2, order=2), 
