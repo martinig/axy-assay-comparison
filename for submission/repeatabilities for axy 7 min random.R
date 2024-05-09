@@ -74,7 +74,7 @@ summary(adult_axy_all)
 
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days
-nrow(adult_axy_all) #4570 records
+nrow(adult_axy_all) #4507 records
 
 
 #############################
@@ -254,7 +254,7 @@ summary(yearling_axy_all)
 
 (yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #86 individuals
 (yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #1764 deployment days
-nrow(yearling_axy_all) #1792 records
+nrow(yearling_axy_all) #1764 records
 
 #############################
 ######## PC1 models ########
@@ -379,7 +379,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=yearling_axy_all)
+m2b<-lmer(PC2 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr), data=yearling_axy_all)
 summary(m2b)
 
 plot(m2b)
