@@ -160,7 +160,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1| axy_yr), data=yearling_axy_all)
+m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1| axy_yr), data=yearling_axy_all) #note that fit is singular when I use grid_yr, so using year for this model only
 summary(m2b)
 
 plot(m2b)

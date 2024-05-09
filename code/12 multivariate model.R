@@ -1,7 +1,7 @@
 #multivariate models for assay and axy principal components (PC1, PC2, no PC3 at this time)
 #global dataset 
 #original code by A. R. Martinig
-#last edited April 23, 2024 by A. R. Martinig
+#last edited May 9, 2024 by A. R. Martinig
 
 
 #run the following prior to running script:
@@ -174,10 +174,9 @@ HPDinterval(mod.1$VCV[,17:32])
 posterior.mode(mod.1$VCV[,33:36]) #residuals
 HPDinterval(mod.1$VCV[,33:36])  #use 33:48 when rcov=~us(trait):units   
 
-
 #to get the gelman-rubin stat:
 chains <- as.mcmc.list(lapply(1:2, function(i)
-	MCMCglmm(cbind(OFT1, MIS1, PC1, PC2) ~ trait-1 + trait:sex + trait:age + trait:age2 + trait:date + trait:local.density + trait:avg_fam, random = ~us(trait):squirrel_id + us(trait):year, rcov = ~us(trait):units, family = c("gaussian", "gaussian", "gaussian", "gaussian"), data= final_MCMC, prior = prior.iw, verbose=FALSE, nitt= 303000, thin=300, burnin=3000)$Sol ))
+	MCMCglmm(cbind(OFT1, OFT2, PC1, PC2) ~ trait-1 + trait:sex + trait:age + trait:age2 + trait:date + trait:local.density + trait:avg_fam, random = ~us(trait):squirrel_id + us(trait):year, rcov = ~us(trait):units, family = c("gaussian", "gaussian", "gaussian", "gaussian"), data= final_MCMC, prior = prior.iw, verbose=FALSE, nitt= 303000, thin=300, burnin=3000)$Sol ))
 
 gelman.diag(chains) #if it has converged, the scale reduction should be 1 (i.e., none)
 gelman.plot(chains)

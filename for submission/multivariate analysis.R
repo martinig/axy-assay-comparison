@@ -1,6 +1,6 @@
 #multivariate analysis for the complete assay and axy dataset
 #original code by A. R. Martinig
-#last edited on May 7, 2024 by A. R. Martinig 
+#last edited on May 9, 2024 by A. R. Martinig 
 
 
 options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror
@@ -155,7 +155,7 @@ HPDinterval(mod.1$VCV[,33:36])  #use 33:48 when rcov=~us(trait):units
 
 #to get the gelman-rubin stat:
 chains <- as.mcmc.list(lapply(1:2, function(i)
-	MCMCglmm(cbind(OFT1, MIS1, PC1, PC2) ~ trait-1 + trait:sex + trait:age + trait:age2 + trait:date + trait:local.density + trait:avg_fam, random = ~us(trait):squirrel_id + us(trait):year, rcov = ~us(trait):units, family = c("gaussian", "gaussian", "gaussian", "gaussian"), data= final_MCMC, prior = prior.iw, verbose=FALSE, nitt= 303000, thin=300, burnin=3000)$Sol ))
+	MCMCglmm(cbind(OFT1, OFT2, PC1, PC2) ~ trait-1 + trait:sex + trait:age + trait:age2 + trait:date + trait:local.density + trait:avg_fam, random = ~us(trait):squirrel_id + us(trait):year, rcov = ~us(trait):units, family = c("gaussian", "gaussian", "gaussian", "gaussian"), data= final_MCMC, prior = prior.iw, verbose=FALSE, nitt= 303000, thin=300, burnin=3000)$Sol ))
 
 gelman.diag(chains) #if it has converged, the scale reduction should be 1 (i.e., none)
 gelman.plot(chains)

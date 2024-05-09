@@ -345,7 +345,7 @@ coda::HPDinterval(rID)
 #non-adjusted repeatability
 #############################
 
-m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1|grid_yr), data= yearling_assay_all) #note that fit is singular when I use grid_yr, so using year for this model only
+m4a<-lmer(OFT2 ~ (1|squirrel_id) + (1|year), data= yearling_assay_all) #note that fit is singular when I use grid_yr, so using year for this model only
 summary(m4a)
 
 plot(m4a) 
@@ -457,7 +457,7 @@ nrow(adult_axy_all) #29144 records
 #non-adjusted repeatability
 #############################
 
-m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all)
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr) + (1|tod), data=adult_axy_all, control=lmerControl(optimizer="Nelder_Mead"))
 summary(m1a)
 
 plot(m1a) 
@@ -751,7 +751,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~   sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all)
+m2b<-lmer(PC2 ~   sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr) + (1|tod), data=yearling_axy_all, control=lmerControl(optimizer="Nelder_Mead"))
 summary(m2b)
 
 plot(m2b)
