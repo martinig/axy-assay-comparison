@@ -2,7 +2,7 @@
 
 #all the data cleaning is here 
 #original code by A. R. Martinig
-#Last edited on May 1, 2024 by A. R. Martinig 
+#Last edited on May 8, 2024 by A. R. Martinig 
 
 
 ########################################
@@ -11,7 +11,7 @@
   
 axy<-read.csv("allaxy_random_7minute_sample.csv", header=T) %>%
 	mutate(
-		axy_id=paste(id, date, tod, sep = "-"), 
+		axy_id=paste(id, date, sep = "-"), #do not include tod for random sampling because the samples can be across multiple tod's because it's random
 		axy_date=ymd(date),
 		axy_yr=year(date),
 		axy_month=month(date), 
@@ -47,7 +47,7 @@ axy1<- dplyr::left_join(axy, birth, by=c("squirrel_id")) %>%
     axy_age = axy_yr-byear, #calc age
     axy_ageclass = ifelse(axy_age==1, "Y", 
                           ifelse(axy_age >1, "A",
-                                 ifelse(axy_age < 1, "J", "")))) %>% #creating age class  
+                          ifelse(axy_age < 1, "J", "")))) %>% #creating age class  
   	ungroup() %>%   	      	
   ##group by squirrel id and axy id (treats each axy as behavior trial) 
   	group_by(squirrel_id, axy_id) %>%
@@ -77,6 +77,7 @@ head(axy1)
 
 table(axy1$sex)
 
+axy1 %>% filter(squirrel_id== 23286 & axy_date=="2019-08-22")
 
 ########################################
 ######  extracting summary stats  ######

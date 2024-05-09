@@ -44,48 +44,52 @@ pacman::p_load(#
 )#
 select<-dplyr::select#
 filter<-dplyr::filter#
-############################################
-#############           Assay             ##############
-#############      Full dataset         ##############
-############################################
-#
 ###############################
 #  calculating repeatabilities  ##
 ###############################
-#
 ##########################################
 #############       Adults         ###############
-#############      n = 367         ###############
-##########################################
-#
-adult_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%#
-	filter(ageclass=="A") %>% #
-	mutate(trialnumber=as.numeric(trialnumber),#
+#############      n = 177         ###############
+#########################################	#
+#create working dataframe#
+adult_axy_all<-read.csv("dataset_random.csv", header=T) %>% #
+  filter(axy_ageclass =="A") %>% #
+  mutate(#
   		grid=ifelse(grid=="SUX", "SU", grid),#
-		grid_yr=paste(grid, year, sep=""),#
-		year=year-2005) %>%#
-	ungroup() %>%	#
-	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
-	mutate(b.assay.local.density= mean(assay.local.density),		#
-		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+		grid_yr=paste(grid, axy_yr, sep=""),#
+		axy_yr = axy_yr-2014) %>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
 	ungroup()#
-summary(adult_assay_all)#
+summary(adult_axy_all)#
 #
-(adult_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #367 individuals#
-summary(adult_assay_all$trialnumber)#
-nrow(adult_assay_all) #484
-yearling_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%	filter(ageclass=="Y") %>% #
-	mutate(trialnumber=as.numeric(trialnumber),#
-  		grid=ifelse(grid=="SUX", "SU", grid),#
-		grid_yr=paste(grid, year, sep=""),#
-		year=year-2005) %>%#
-	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
-	mutate(b.assay.local.density= mean(assay.local.density),		#
-		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults#
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days#
+nrow(adult_axy_all) #4570 records
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)#
+summary(m1a)
+m1b<-lmer(PC1 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
+m2b<-lmer(PC2 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=adult_axy_all)
+yearling_axy_all<-read.csv("dataset_random.csv", header=T) %>% #
+  filter(axy_ageclass=="Y") %>% #
+  mutate(#
+  		 grid=ifelse(grid=="SUX", "SU", grid),#
+		grid_yr=paste(grid, axy_yr, sep=""),#
+		axy_yr=axy_yr-2014) %>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
 	ungroup()#
 #
-summary(yearling_assay_all)#
+summary(yearling_axy_all)#
 #
-(yearling_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #209 individuals#
-summary(yearling_assay_all$trialnumber)#
-nrow(yearling_assay_all) #257
+(yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #86 individuals#
+(yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #1764 deployment days#
+nrow(yearling_axy_all) #1792 records
+m1a<-lmer(PC1 ~ (1|squirrel_id) + (1|grid_yr), data=yearling_axy_all)
+m1b<-lmer(PC1 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|grid_yr), data=yearling_axy_all)
+m2a<-lmer(PC2 ~ (1|squirrel_id) + (1|grid_yr), data=yearling_axy_all)
+m2b<-lmer(PC2 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1|axy_yr), data=yearling_axy_all)
+m2b<-lmer(PC2 ~ sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1| grid_yr), data=yearling_axy_all)

@@ -4,7 +4,7 @@
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (e.g., A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
 #original code by A. R. Martinig
-#last edited April 24, 2024 by A. R. Martinig
+#last edited May 8, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -12,8 +12,6 @@ axy data subsets.R
 PCA generation code - axy.R
 local density (global datasets).R
 familiarity axy (global datasets).R
-
-write.csv(adult_axy_all, "/Users/april-martinig/Desktop/dataset_random.csv")
 
 #create working dataframe
 adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy_yr"="axy_yr"))%>%
@@ -29,10 +27,11 @@ adult_axy_all<-left_join(axy1, clean_axy, by=c("squirrel_id"="squirrel_id", "axy
 	ungroup()
 	
 summary(adult_axy_all)
+tail(adult_axy_all)
 
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days
-nrow(adult_axy_all) #4570 records
+nrow(adult_axy_all) #4507 records
 
 table(adult_axy_all$grid_yr) #28 levels
 table(adult_axy_all$axy_yr) #9 levels
