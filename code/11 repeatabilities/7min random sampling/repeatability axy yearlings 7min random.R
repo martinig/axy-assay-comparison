@@ -30,7 +30,7 @@ summary(yearling_axy_all)
 
 (yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #86 individuals
 (yearling_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #1764 deployment days
-nrow(yearling_axy_all) #1792 records
+nrow(yearling_axy_all) #1764 records
 
 ########################################
 #############     Yearlings        #############

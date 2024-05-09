@@ -83,7 +83,7 @@ table(axy1$sex)
 ########################################
 
 (axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #241 individuals
-nrow(axy1) #6271
+nrow(axy1) #6362
 
 #deployment dates needed to calculate the exact number of sessions
 (axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 465 sessions 

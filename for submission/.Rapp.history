@@ -44,48 +44,86 @@ pacman::p_load(#
 )#
 select<-dplyr::select#
 filter<-dplyr::filter#
-############################################
-#############           Assay             ##############
-#############      Full dataset         ##############
-############################################
-#
 ###############################
 #  calculating repeatabilities  ##
 ###############################
-#
 ##########################################
 #############       Adults         ###############
-#############      n = 367         ###############
+#############      n = 177         ###############
+#########################################	#
+#create working dataframe#
+adult_axy_all<-read.csv("dataset_random.csv", header=T) %>% #
+  filter(axy_ageclass =="A") %>% #
+  mutate(#
+  		grid=ifelse(grid=="SUX", "SU", grid),#
+		grid_yr=paste(grid, axy_yr, sep=""),#
+		axy_yr = axy_yr-2014) %>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
+	ungroup()#
+summary(adult_axy_all)#
+#
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults#
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days#
+nrow(adult_axy_all) #4570 records
+options(scipen=999, dplyr.width = Inf, tibble.print_min = 50, repos='http://cran.rstudio.com/') #scipen forces outputs to not be in scientific notation #dplyr.width will show all columns for head() function and tibble.print_min sets how many rows are printed and repos sets the cran mirror#
+#
+#load libraries#
+pacman::p_load(#
+				ggplot2, #
+				ggstatsplot,#
+               dplyr, #
+               lubridate, #
+               tidyverse,   #
+               broom,  #
+               FSA,      #
+               glmmTMB,  #
+               lme4,   #
+               tidyr,      #
+               DescTools,#
+               scales,#
+               ggpubr,#
+               grid,#
+               lattice,#
+               sjPlot,#
+               sjlabelled,#
+               sjmisc,#
+               cowplot, #
+               broom.mixed,#
+               ggforce, #
+               gridGraphics,#
+               ggeffects,#
+               magrittr,#
+               MCMCglmm,#
+               data.table,#
+               lattice,#
+               stats,#
+               cowplot,#
+               krsp#
+)#
+select<-dplyr::select#
+filter<-dplyr::filter#
+###############################
+#  calculating repeatabilities  ##
+###############################
 ##########################################
-#
-adult_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%#
-	filter(ageclass=="A") %>% #
-	mutate(trialnumber=as.numeric(trialnumber),#
+#############       Adults         ###############
+#############      n = 177         ###############
+#########################################	#
+#create working dataframe#
+adult_axy_all<-read.csv("dataset_consecutive.csv", header=T) %>% #
+  filter(axy_ageclass =="A") %>% #
+  mutate(#
   		grid=ifelse(grid=="SUX", "SU", grid),#
-		grid_yr=paste(grid, year, sep=""),#
-		year=year-2005) %>%#
-	ungroup() %>%	#
-	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
-	mutate(b.assay.local.density= mean(assay.local.density),		#
-		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
+		grid_yr=paste(grid, axy_yr, sep=""),#
+		axy_yr = axy_yr-2014) %>%#
+	group_by(squirrel_id) %>% #convert these variables to among-ind effects    #
+	mutate(b.axy.local.density=mean(axy.local.density),#
+		b.axy_avg_fam=mean(axy_avg_fam, na.rm=T)) %>%#
 	ungroup()#
-summary(adult_assay_all)#
+summary(adult_axy_all)#
 #
-(adult_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #367 individuals#
-summary(adult_assay_all$trialnumber)#
-nrow(adult_assay_all) #484
-yearling_assay_all<-read.csv("dataset_complete_assay.csv", header=T)  %>%	filter(ageclass=="Y") %>% #
-	mutate(trialnumber=as.numeric(trialnumber),#
-  		grid=ifelse(grid=="SUX", "SU", grid),#
-		grid_yr=paste(grid, year, sep=""),#
-		year=year-2005) %>%#
-	group_by(squirrel_id) %>% #convert these variables to among-ind effects #
-	mutate(b.assay.local.density= mean(assay.local.density),		#
-		b.assay_avg_fam= mean(assay_avg_fam, na.rm=T)) %>%#
-	ungroup()#
-#
-summary(yearling_assay_all)#
-#
-(yearling_assay_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #209 individuals#
-summary(yearling_assay_all$trialnumber)#
-nrow(yearling_assay_all) #257
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults#
+(adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days#
+nrow(adult_axy_all) #4570 records
