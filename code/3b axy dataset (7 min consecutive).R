@@ -2,7 +2,7 @@
 
 #all the data cleaning is here 
 #original code by A. R. Martinig
-#Last edited on May 1, 2024 by A. R. Martinig 
+#Last edited on May 8, 2024 by A. R. Martinig 
 
 
 ########################################
@@ -11,7 +11,7 @@
   
 axy<-read.csv("allaxy_consecutive_7minute_sample.csv", header=T) %>%
 	mutate(
-		axy_id=paste(id, date, tod, sep = "-"), 
+		axy_id=paste(id, date, sep = "-"), #do not include tod for consecutive sampling because the samples can be across two tod's even though it's consecutive (i.e., it's only 1 sample per day)
 		axy_date=ymd(date),
 		axy_yr=year(date),
 		axy_month=month(date),		
@@ -29,8 +29,6 @@ axy<-read.csv("allaxy_consecutive_7minute_sample.csv", header=T) %>%
 
 head(axy)
 summary(axy)
-
-axy %>% filter(squirrel_id== 23286 & axy_id=="23286-2019-08-22-day")
 
 
 (axy) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #241 individuals
@@ -83,7 +81,7 @@ table(axy1$sex)
 ########################################
 
 (axy1) %>% as_tibble() %>% count(squirrel_id) %>% nrow() #241 individuals
-nrow(axy1) #6362
+nrow(axy1) #6271
 
 #deployment dates needed to calculate the exact number of sessions
 (axy1) %>% as_tibble() %>% count(squirrel_id, axy_yr, axy_month) %>% nrow() #approximately 465 sessions 

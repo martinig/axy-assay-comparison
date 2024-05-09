@@ -4,7 +4,7 @@
 ##KEEP IN MIND: Some squirrels had axy conducted when they were in different ageclasses (A and Y)
 ###these squirrels cause imbalances when looking at ageclass summaries
 #original code by A. R. Martinig
-#last edited April 24, 2024 by A. R. Martinig
+#last edited May 8, 2024 by A. R. Martinig
 
 #run the following prior to running script:
 start-up code.R
@@ -160,7 +160,7 @@ coda::HPDinterval(rID2)
 #adjusted repeatability
 #############################
 
-m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1| grid_yr), data=yearling_axy_all)
+m2b<-lmer(PC2 ~  sex + b.axy.local.density + b.axy_avg_fam + (1|squirrel_id) + (1| axy_yr), data=yearling_axy_all)
 summary(m2b)
 
 plot(m2b)

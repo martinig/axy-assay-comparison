@@ -74,7 +74,7 @@ summary(adult_axy_all)
 
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id) %>% nrow() #177 adults
 (adult_axy_all) %>% as_tibble() %>% dplyr::count(squirrel_id, axy_yr, axy_date) %>% nrow() #4507 deployment days
-nrow(adult_axy_all) #4570 records
+nrow(adult_axy_all) #4507 records
 
 
 #############################
