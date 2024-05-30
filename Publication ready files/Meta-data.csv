@@ -1,0 +1,43 @@
+Variable,Definition
+squirrel_id,Unique individual identity
+sex,"Sex (F = female, M = male)"
+OFT1,Open field trial assay PC1 score
+OFT2,Open field trial assay PC2 score
+observer,Individual the conducted the observation
+ageclass,"Juvenile (J = < 1 year old), yearling (Y = 1 year old), or adult (A > 1 year old) for assay (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)"
+axy_ageclass,"Juvenile (J = < 1 year old), yearling (Y = 1 year old), or adult (A > 1 year old) for accelerometer"
+cohort,Year of birth
+year,Year of assay observation (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+axy_yr,Year of accelerometer observation
+axy_month,"Month accelerometer observation was collected (1=January, 12=December)"
+assay_season,Season assay observation was collected
+axy_season,Season accelerometer observation was collected
+tod,Time of day the accelerometer was recording
+age,Age (years old) when assay was conducted (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+axy_age,Age (years old) when accelerometer was conducted
+grid,Study site location
+trialnumber,Lifetime assay number (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+axy_id,Lifetime accelerometer number
+trialdate,Date the assay was done on (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+axy_date,Date the accelerometer was done on
+assay.local.density,Local population density for assays (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+assay_avg_fam,Average social familiarity for assays (note that in the final_dataset_merged csv this column combines both assay and accelerometer records)
+axy.local.density,Local population density for accelerometers
+axy_avg_fam,Average social familiarity for accelerometers
+feed,Individual eats cones or mushrooms - for accelerometers
+forage,"Individual searches for and collects food: Clipping cones, Searching on the ground (slow travel), Digging in the ground, Caching food - for accelerometers"
+nestmove,Individual moves its body while inside of a nest - for accelerometers
+nestnotmove,Individual remains still while inside of a nest - for accelerometers
+notmoving,Individual remains still while outside of a nest - for accelerometers
+travel,"Individual moves itself through space in any direction (i.e., when the individual is generating high acceleration values) - for accelerometers"
+prop_feeding,Amount of time spent feeding divided by total observation length for accelerometers
+prop_foraging,Amount of time spent foraging divided by total observation length for accelerometers
+prop_nestmoving,Amount of time spent moving in nest divided by total observation length for accelerometers
+prop_nestnotmoving,Amount of time spent not moving in nest divided by total observation length for accelerometers
+prop_notmoving,Amount of time spent not moving divided by total observation length for accelerometers
+prop_travel,Amount of time spent travelling divided by total observation length for accelerometers
+byear,Year of birth
+dyear,Year of death
+litter_id,Unique litter identity
+PC1,Accelerometer PC1 score
+PC2,Accelerometer PC2 score
